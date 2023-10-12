@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>formic.id</title>
+    <style>
+        * { font-family: "PragmataPro Liga", PragmataPro, monospace; text-align: center; }
+        a { text-decoration: none; }
+    </style>
+</head>
+
+<body>
+    <div id="root">
+        <h1>loading…</h1>
+        <div id="uponLoad" style="display: none;">
+            <form id="bootform">
+                <p></p><input type="text" id="boot" placeholder="STOR" style="width: 80%;" /></p>
+                <p><input type="submit" id="go" value="eval"></button></p>
+            </form>
+            <h2>Examples</h2>
+            <div id="examples">
+                <a href="#">/demo http-get eval</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        Array.from(document.getElementById('examples').children).forEach((c) => {
+            c.onclick = (e) => {
+                e.preventDefault();
+                document.getElementById('boot').value = c.textContent;
+            };
+        });
+
+        // TODO: drop the randomnization once worker JS stabilizes.
+        const worker = new Worker(`worker.js?${Math.random()}`);
+        // First message indicates the worker has started.
+        worker.onmessage = (evt) => {
+            if (evt.data) {
+                console.log(`Failed loading: ${evt.data}`);
+            } else {
+                worker.onmessage = (evt) => eval(evt.data);
+                document.getElementById('uponLoad').style.display = 'block';
+                document.getElementsByTagName('h1')[0].textContent = 'formic.id';
+            }
+        }
+
+        document.getElementById('bootform').addEventListener('submit', (e) => {
+            e.preventDefault();
+            worker.postMessage(document.getElementById('boot').value);
+        });
+    </script>
+</body>
+
+</html>
