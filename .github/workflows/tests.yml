@@ -1,0 +1,15 @@
+on:
+  pull_request:
+  push:
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: mymindstorm/setup-emsdk@v11
+    - uses: iffy/install-nim@v5
+      with:
+        version: binary:stable
+    - run: |
+        nimble test
+        nimble build

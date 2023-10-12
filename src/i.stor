@@ -1,0 +1,26 @@
+{ #c "Internals and primitives."
+  code\ tag #u64 6
+  halt %0  noop %1  eval %2  kind %3  size %4
+  untag %5  tag %6
+  enter %8  leave %9  sclear %10  dclear %11
+  #c [ 'TODO recv %16  send %17 ]
+  push %24  pop %25  set %30  get %31
+  <data %33  <stream %34  <contexts %35
+  drop %48  pick %49  swap %51  rot %52
+  + %64  - %65  * %66
+  #c [ 'TODO / %67  % %69  /% %70  ^ %71 ]
+  < %72  > %73  = %74  <= %75  >= %76
+  #c [ 'TODO & %77  | %78  ! %79  << %80  >> %81 ]
+  >u8 %82  >u16 %83  >u32 %84  >u64 %85  >i8 %86  >i16 %87  >i32 %88  >i64 %89  >f16 %90  >f32 %91  >f64 %92  >str %93  >sym %94
+  #c "Code in and out"
+  >immediate ( code\ tag tag )
+  immediate> ( kind 0 = [ untag swap drop ] [ halt ] if )
+  #c "Stack manipulation"
+  dup ( #u8 0 pick )
+  over ( #u8 1 pick )
+  #c "Control flow"
+  if    ( [ ] swap push swap push swap >u8 get eval )
+  when  ( [ ] if )
+  do-while ( [ [ ~while~ ] when ] swap + dup >immediate
+             { } swap [ ~while~ ] pop swap set
+             enter eval leave ) }

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "formic",
+  "patterns": [
+    {
+      "include": "#double-quoted-strings"
+    },
+    {
+			"include": "#single-quoted-strings"
+    }
+  ],
+  "repository": {
+    "double-quoted-strings": {
+      "name": "string.quoted.double.formic",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.formic",
+          "match": "\\\\."
+        }
+      ]
+    },
+		"single-quoted-strings": {
+			"name": "string.quoted.single.formic",
+			"match": "'\\S*",
+			"patterns": [
+        {
+          "name": "constant.character.escape.formic",
+          "match": "\\\\."
+        }
+			]
+		}
+  },
+  "scopeName": "source.formic"
+}

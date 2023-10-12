@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>formic.id</title>
+    <meta
+      name="description"
+      content="formic, a naive but expressive concatenative homoiconic language for interactive computing"
+    />
+    <style>
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: normal;
+        font-weight: 400;
+        src: url(fonts/PragmataProR_liga_0829.woff2) format("woff2");
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: normal;
+        font-weight: 700;
+        src: url(fonts/PragmataProB_liga_0829.woff2) format("woff2");
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: italic;
+        font-weight: 400;
+        src: url(fonts/PragmataProI_liga_0829.woff2) format("woff2");
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: italic;
+        font-weight: 700;
+        src: url(fonts/PragmataProZ_liga_0829.woff2) format("woff2");
+        font-display: swap;
+      }
+
+      * {
+        font-family: PragmataPro, monospace;
+        text-align: center;
+      }
+
+      a,
+      a:visited {
+        text-decoration: none;
+        color: #ff0;
+      }
+
+      html {
+        max-width: 80em;
+        margin: 0 auto 0 auto;
+        padding: 2em;
+        color: #ccc;
+        background-color: #222;
+      }
+
+      h1 > span {
+        color: #888;
+      }
+
+      input {
+        color: #fff;
+        background-color: #111;
+        border: 1px solid #ccc;
+        font-size: 100%;
+      }
+
+      input#boot,
+      pre {
+        width: 100%;
+        margin: 0.5em auto 0.5em auto;
+      }
+
+      h1,
+      h2,
+      h3,
+      tt,
+      pre {
+        color: #fff;
+      }
+
+      pre {
+        background-color: #111;
+      }
+
+      footer {
+        margin: 2em auto 0 auto;
+        font-size: 80%;
+      }
+
+      table {
+        table-layout: fixed;
+        width: 100%;
+        margin: 0;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        vertical-align: top;
+        padding: 0.5em;
+      }
+
+      dd,
+      dt,
+      li {
+        text-align: left;
+      }
+
+      dl {
+        margin: 0;
+      }
+
+      dd,
+      ol,
+      ul {
+        margin: 0 0 0 1em;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root">
+      <h1><img src="favicon.svg" /><br />formic<span>.id</span></h1>
+      <p>
+        The <tt>formic</tt> language is in its infancy.<br />Intended to be
+        <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)"
+          >interpreted</a
+        >
+        on the Web, behind and beyond.<br />Interactive, dynamic,
+        <a href="https://concatenative.org">concatenative</a> and
+        <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a
+        >.<br />
+        Mostly
+        <a href="https://github.com/pcarrier/formicid/blob/main/notes.md"
+          >a bunch of notes</a
+        >
+        and vague dreams for now.<br />
+        As this is being built live, it's broken at times.
+      </p>
+      <form id="bootform" style="display: none">
+        <div id="log"></div>
+        <p>
+          <input
+            type="text"
+            id="boot"
+            placeholder="Enter instructions, then press ⏎ or click submit"
+            autofocus
+            onfocus="this.select()"
+          /><br />
+          <input type="checkbox" id="tuck" checked /><label for="tuck"
+            >tuck</label
+          >
+          <input type="submit" id="go" value="submit" style="font-size: 100%" />
+        </p>
+
+        <div id="target"></div>
+
+        <h2>Suggestions</h2>
+        <h3>Tests</h3>
+        <pre><a class="evaluable" href="#"
+              >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459
+ swap &gt;f64 * >u8 ] eval</a></pre>
+        <pre><a class="evaluable" href="#"
+          >{ u64-factorial ( #u64 1 swap [ swap over * swap #u64 1 swap - dup #u64 1 < ] do-while drop ) } enter 
+#u64 20 u64-factorial 
+leave</a></pre>
+        <h3>Aspirational</h3>
+        <pre><a class="evaluable" href="#"
+              >'/devenv fetch 'body get stor> eval</a></pre>
+        <pre><a class="evaluable" href="#"
+              >{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } fetch 'body get cbor> eval</a></pre>
+      </form>
+      <footer>
+        <cite
+          >Je vous écris une longue lettre parce que je n'ai pas le temps d'en
+          écrire une courte. — Blaise Pascal</cite
+        >
+        <br />
+        © 2023 <a href="https://pcarrier.com/">Pierre Carrier</a>.
+        <a href="https://github.com/pcarrier/form">Code</a> licensed under
+        <a
+          href="https://raw.githubusercontent.com/pcarrier/formicid/main/LICENSE.md"
+          >Zero-Clause BSD</a
+        >.
+        <a href="https://en.wikipedia.org/wiki/File:Ant_(Jacob_Eckert).svg"
+          >Logo</a
+        >
+        by Jacob Eckert.
+        <a href="https://fsd.it/shop/fonts/pragmatapro/">Font</a> by Fabrizio
+        Schiavi Design.
+      </footer>
+    </div>
+    <script>
+      Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
+        c.onclick = (e) => {
+          e.preventDefault();
+          document.getElementById("boot").value = c.textContent;
+        };
+      });
+      const worker = new Worker("worker.js");
+      window.$worker = worker;
+      window.$target = document.getElementById("target");
+      // First message indicates the worker has started.
+      worker.onmessage = (evt) => {
+        if (evt.data) {
+          console.log(`Failed loading: ${evt.data}`);
+        } else {
+          worker.onmessage = (evt) => eval(evt.data);
+          document.getElementById("bootform").style.display = "block";
+        }
+      };
+
+      let b = document.getElementById("boot"),
+        t = document.getElementById("tuck"),
+        l = document.getElementById("log");
+      document.getElementById("bootform").addEventListener("submit", (e) => {
+        e.preventDefault();
+        let log = document.createElement("pre");
+        log.textContent = b.value;
+        l.appendChild(log);
+        $target.innerHTML = "<em>…</em>";
+        worker.postMessage([0, [Number(t.checked), b.value]]);
+      });
+    </script>
+  </body>
+</html>

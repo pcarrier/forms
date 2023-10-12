@@ -1,0 +1,22 @@
+{
+  "name": "formicid",
+  "displayName": "formicid",
+  "description": "formic.id languages support",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.83.0"
+  },
+  "contributes": {
+    "languages": [{
+      "id": "formic",
+      "aliases": ["formic", "form", "stor"],
+      "extensions": [".formic",".form",".stor"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "formic",
+      "scopeName": "source.formic",
+      "path": "./syntaxes/formic.tmLanguage.json"
+    }]
+  }
+}
