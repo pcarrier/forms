@@ -16,7 +16,27 @@ I/O. `read` `write` / `receive` `send`
 
 ## data
 
-map CBOR.
+Use CBOR for storage and optionally in the protocol.
+
+Offer a textual equivalent, Simple Text Object Representation, around:
+
+```
+4269%        tag prefix
+1023         int
+-4.2e-4      float
+-5f16        16-bit float
+#0…#255     simple value
+#n           null
+#u           undefined
+#t           true
+#f           false
+[ a b c ]    array
+{ a b c d }  map
+"\05ab\02"   string
+hello14!     string
+#b"\05ab\02" byte array
+abc          unquoted strings
+```
 
 ## code
 
