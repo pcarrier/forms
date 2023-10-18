@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>formic.id</title>
+    <title>form</title>
     <style>
         * { font-family: "PragmataPro Liga", PragmataPro, monospace; text-align: center; }
         a { text-decoration: none; }
@@ -16,14 +16,18 @@
         <h1>loading…</h1>
         <div id="uponLoad" style="display: none;">
             <form id="bootform">
-                <p></p><input type="text" id="boot" placeholder="STOR" style="width: 80%;" /></p>
-                <p><input type="submit" id="go" value="eval"></button></p>
+                <p><input type="text" id="boot" placeholder="STOR" style="width: 80%; font-size: 100%;" /></p>
+                <p><input type="submit" id="go" value="eval" style="font-size: 100%;"></button></p>
             </form>
             <h2>Examples</h2>
             <div id="examples">
                 <a href="#">/demo http-get eval</a>
             </div>
         </div>
+        <p>
+            © 2023 <a href="mailto:pc@rrier.fr">Pierre Carrier</a>.
+            <a href="https://github.com/pcarrier/form">Code</a> licensed under <a href="https://raw.githubusercontent.com/pcarrier/form/main/LICENSE.md">Zero-Clause BSD</a>.
+        </p>
     </div>
     <script>
         Array.from(document.getElementById('examples').children).forEach((c) => {
@@ -42,7 +46,7 @@
             } else {
                 worker.onmessage = (evt) => eval(evt.data);
                 document.getElementById('uponLoad').style.display = 'block';
-                document.getElementsByTagName('h1')[0].textContent = 'formic.id';
+                document.getElementsByTagName('h1')[0].textContent = 'form';
             }
         }
 
