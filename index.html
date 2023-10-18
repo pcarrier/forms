@@ -32,7 +32,7 @@
       <h1>loading…</h1>
       <div id="uponLoad" style="display: none">
         <p>
-          <tt>form</tt> is in its infancy. Intended to be a
+          <tt>form</tt> is in its infancy. Intended to be a slow but expressive
           <a href="https://concatenative.org">concatenative</a>
           <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a>
           <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)"
@@ -57,8 +57,8 @@
           </p>
         </form>
         <h2>Starting points</h2>
-        <pre><a class="evaluable" href="#">'/devenv http 'body get stor> eval</a>
-<a class="evaluable" href="#">{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } http 'body get cbor> eval</a></pre>
+        <pre><a class="evaluable" href="#">'/devenv fetch 'body get stor> eval</a>
+<a class="evaluable" href="#">{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } fetch 'body get cbor> eval</a></pre>
       </div>
       <p>
         <small>

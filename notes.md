@@ -1,71 +1,40 @@
 Dabbling at a formulaic format forming formidable formalisms.
 
-Form follows function, function transforms.
-
 ## essence
 
-Take your time. `: breath ( in -- out ).`
+Arithmetic. `+ - * / % ^ < > = <= >= & | ! >> <<`
 
-Computation. `apply` `compose` `drop` `dup` `quote` `swap`
+Dict. `get` `set` `lose` `within` `leave`
 
-Context. `assoc` `dissoc` `enter` `leave`
+I/O. `receive` `send` `fetch`
+
+Formats. `stor>` `>stor` `cbor>` `>cbor`
 
 Concurrency. `spawn` `die`
 
-I/O. `read` `write` / `receive` `send`
+## CBOR
 
-## data
+Tags: 6 for symbols, 28-29 for cycles.
 
-- Use CBOR for storage (refs are serialized as ) and optionally in the protocol.
-- Use STOR when text is warranted.
-
-## code
-
-use nim, inspect min & factor.
-
-## verbiage
-
-journal.
-receive and build knowledge.
-persist inputs.
-internalize.
-be lazy.
-
-## primitives
-
-read
-write
-remember
-forget
-discard
-recall
-spawn
-die
-
-## CLI UX
+## STOR
 
 ```
-$ form
-Usage: form [opts] [source …]
-opts:
-  -h            show copyright and licensing information
-  -i            interactive console
-  -n [::1]:1337 network instance
-$ form -i hello.f > world.f
-0. [ the
-     stack ]
-1. { being
-       b'built'
-     through
-       b'the' }
-42> { [ very interactive ]
-        prompt }
-@ most recently defined b'locals'
-< … most recently accessed symbols 'under pagination' …
-> … +most +recently *altered -symbols                 …
+#u #n #f #t
+0 +3.14 6.626068e-34 +299_792_458 0xdeadbeef
+#+inf #-inf #nan
+#fl|#f64|#f32|#f16 …
+#il|#i64|#i32|#i16|#i8 …
+symbol
+  one\ with\ spaces
+  #s "{another with brackets and braces}"
+'string
+  'one\ with\ spaces
+#b '\ffbinary\00
+"string \u1F600"
+[ 1 2 3 … ]
+{ a 1
+  b 2
+  c 3
+  … }
+\\ \  \n \t \r \b \f \" \' \xx \uxxxx
 ```
-
-## net
-
-https://form.pcarrier.com: frontend
-wss://form.pcarrier.com: VM journal + state + I/O
