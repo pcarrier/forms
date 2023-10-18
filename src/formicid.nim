@@ -14,11 +14,12 @@ func js_string(s: string): string =
     else: add(result, c)
   add(result, "\"")
 
-proc eval_js(code: cstring) = emscripten_run_script(code)
+proc eval_js(code: string) = emscripten_run_script(cstring(code))
 
 proc eval_stor(code: cstring) {.exportc,
     codegenDecl: "__attribute__((used)) $# $#$#".} =
-  let msg = &"I don't know how to evaluate <tt>{js_string($code)}</tt> yet. Or anything, for that matter.<br/><i>This message delivered by Nim code running in WebAssembly in a WebWorker.</i>"
-  eval_js(cstring(&"self.postMessage('document.body.innerHTML = {msg.js_string}')"))
+  let prefix = &"I don't know how to evaluate <tt>{js_string($code)}</tt> yet. Or anything, for that matter.<br/><i>This message delivered by Nim code running in WebAssembly in a WebWorker "
+  for i in 0..high(int):
+    eval_js(&"self.postMessage('document.body.innerHTML = {prefix.js_string}.concat({i}).concat(\" times.</i>\")')")
 
 echo "Booted."
