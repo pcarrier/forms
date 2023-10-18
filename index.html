@@ -30,7 +30,7 @@
   <body>
     <div id="root">
       <h1>loading…</h1>
-      <div id="uponLoad" style="display: none">
+      <div id="target" style="display: none">
         <p>
           <tt>form</tt> is in its infancy. Intended to be a slow but expressive
           <a href="https://concatenative.org">concatenative</a>
@@ -83,13 +83,15 @@
         };
       });
       const worker = new Worker("worker.js");
+      window.$worker = worker;
+      window.$target = document.getElementById("target");
       // First message indicates the worker has started.
       worker.onmessage = (evt) => {
         if (evt.data) {
           console.log(`Failed loading: ${evt.data}`);
         } else {
           worker.onmessage = (evt) => eval(evt.data);
-          document.getElementById("uponLoad").style.display = "block";
+          $target.style.display = "block";
           document.getElementsByTagName("h1")[0].innerHTML =
             '<img src="favicon.svg"/><br/>formic.id';
         }
