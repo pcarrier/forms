@@ -1,6 +1,7 @@
 from strformat import `&`
 
-proc emscripten_run_script(code: cstring) {.header: "<emscripten.h>", importc: "emscripten_run_script".}
+proc emscripten_run_script(code: cstring) {.header: "<emscripten.h>",
+    importc: "emscripten_run_script".}
 
 func js_string(s: string): string =
   result = newStringOfCap(s.len + s.len shr 2)
@@ -15,8 +16,9 @@ func js_string(s: string): string =
 
 proc eval_js(code: cstring) = emscripten_run_script(code)
 
-proc eval_stor(code: cstring) {.exportc, codegenDecl: "__attribute__((used)) $# $#$#".} =
-  let msg = &"I don't know how to evaluate {js_string($code)} yet, but I, Nim code running in wasm in a WebWorker, received it and modifed this DOM."
+proc eval_stor(code: cstring) {.exportc,
+    codegenDecl: "__attribute__((used)) $# $#$#".} =
+  let msg = &"I don't know how to evaluate <tt>{js_string($code)}</tt> yet. Or anything, for that matter.<br/><i>This message delivered by Nim code running in WebAssembly in a WebWorker.</i>"
   eval_js(cstring(&"self.postMessage('document.body.innerHTML = {msg.js_string}')"))
 
 echo "Booted."

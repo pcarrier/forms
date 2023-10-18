@@ -1,60 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>form</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>formic.id</title>
     <style>
-        * { font-family: "PragmataPro Liga", PragmataPro, monospace; text-align: center; }
-        a { text-decoration: none; }
-    </style>
-</head>
+      * {
+        font-family: "PragmataPro Liga", PragmataPro, monospace;
+        text-align: center;
+      }
+      a {
+        text-decoration: none;
+      }
 
-<body>
+      html {
+        color: #666;
+        background-color: #fff;
+      }
+
+      h1,
+      h2,
+      tt,
+      pre {
+        color: #000;
+      }
+    </style>
+  </head>
+
+  <body>
     <div id="root">
-        <h1>loading…</h1>
-        <div id="uponLoad" style="display: none;">
-            <form id="bootform">
-                <p><input type="text" id="boot" placeholder="STOR" style="width: 80%; font-size: 100%;" /></p>
-                <p><input type="submit" id="go" value="eval" style="font-size: 100%;"></button></p>
-            </form>
-            <h2>Examples</h2>
-            <div id="examples">
-                <a href="#">/demo http-get eval</a>
-            </div>
-        </div>
+      <h1>loading…</h1>
+      <div id="uponLoad" style="display: none">
         <p>
-            © 2023 <a href="mailto:pc@rrier.fr">Pierre Carrier</a>.
-            <a href="https://github.com/pcarrier/form">Code</a> licensed under <a href="https://raw.githubusercontent.com/pcarrier/form/main/LICENSE.md">Zero-Clause BSD</a>.
+          <tt>form</tt> is in its infancy. Intended to be a
+          <a href="https://concatenative.org">concatenative</a>
+          <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a>
+          <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)"
+            >interpreted</a
+          >
+          language.<br />Acyclic data is congruent to
+          <a href="https://cbor.io">CBOR</a> hence STOR (Simple Textual Object
+          Representation, to be specified).<br />Code runs on manipulable stacks
+          &amp; dynamic scopes.
         </p>
+        <form id="bootform">
+          <p>
+            <input
+              type="text"
+              id="boot"
+              placeholder="Enter STOR, then press ⏎ or click eval"
+              style="width: 80%; font-size: 100%"
+            />
+          </p>
+          <p>
+            <input type="submit" id="go" value="eval" style="font-size: 100%" />
+          </p>
+        </form>
+        <h2>Starting points</h2>
+        <pre><a class="evaluable" href="#">'/devenv http 'body get stor> eval</a>
+<a class="evaluable" href="#">{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } http 'body get cbor> eval</a></pre>
+      </div>
+      <p>
+        <small>
+          © 2023 <a href="mailto:pc@rrier.fr">Pierre Carrier</a>.
+          <a href="https://github.com/pcarrier/form">Code</a> licensed under
+          <a
+            href="https://raw.githubusercontent.com/pcarrier/form/main/LICENSE.md"
+            >Zero-Clause BSD</a
+          >.
+          <a href="https://en.wikipedia.org/wiki/File:Ant_(Jacob_Eckert).svg"
+            >Logo</a
+          >
+          by Jacob Eckert.
+        </small>
+      </p>
     </div>
     <script>
-        Array.from(document.getElementById('examples').children).forEach((c) => {
-            c.onclick = (e) => {
-                e.preventDefault();
-                document.getElementById('boot').value = c.textContent;
-            };
-        });
-
-        // TODO: drop the randomnization once worker JS stabilizes.
-        const worker = new Worker(`worker.js?${Math.random()}`);
-        // First message indicates the worker has started.
-        worker.onmessage = (evt) => {
-            if (evt.data) {
-                console.log(`Failed loading: ${evt.data}`);
-            } else {
-                worker.onmessage = (evt) => eval(evt.data);
-                document.getElementById('uponLoad').style.display = 'block';
-                document.getElementsByTagName('h1')[0].textContent = 'form';
-            }
+      Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
+        c.onclick = (e) => {
+          e.preventDefault();
+          document.getElementById("boot").value = c.textContent;
+        };
+      });
+      const worker = new Worker("worker.js");
+      // First message indicates the worker has started.
+      worker.onmessage = (evt) => {
+        if (evt.data) {
+          console.log(`Failed loading: ${evt.data}`);
+        } else {
+          worker.onmessage = (evt) => eval(evt.data);
+          document.getElementById("uponLoad").style.display = "block";
+          document.getElementsByTagName("h1")[0].innerHTML =
+            '<img src="favicon.svg"/><br/>formic.id';
         }
+      };
 
-        document.getElementById('bootform').addEventListener('submit', (e) => {
-            e.preventDefault();
-            worker.postMessage(document.getElementById('boot').value);
-        });
+      document.getElementById("bootform").addEventListener("submit", (e) => {
+        e.preventDefault();
+        worker.postMessage(document.getElementById("boot").value);
+      });
     </script>
-</body>
-
+  </body>
 </html>
