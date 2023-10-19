@@ -5,8 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>formic.id</title>
     <style>
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: normal;
+        font-weight: 400;
+        src: url(fonts/PragmataProR_liga_0829.ttf) format("truetype");
+      }
+
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: normal;
+        font-weight: 700;
+        src: url(fonts/PragmataProB_liga_0829.ttf) format("truetype");
+      }
+
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: italic;
+        font-weight: 400;
+        src: url(fonts/PragmataProI_liga_0829.ttf) format("truetype");
+      }
+
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: italic;
+        font-weight: 700;
+        src: url(fonts/PragmataProZ_liga_0829.tff) format("truetype");
+      }
+
       * {
-        font-family: "PragmataPro Liga", PragmataPro, monospace;
+        font-family: PragmataPro, PragmataPro, monospace;
         text-align: center;
       }
       a {
@@ -62,7 +90,7 @@
       </div>
       <p>
         <small>
-          © 2023 <a href="mailto:pc@rrier.fr">Pierre Carrier</a>.
+          © 2023 <a href="https://pcarrier.com/">Pierre Carrier</a>.
           <a href="https://github.com/pcarrier/form">Code</a> licensed under
           <a
             href="https://raw.githubusercontent.com/pcarrier/form/main/LICENSE.md"
@@ -72,6 +100,8 @@
             >Logo</a
           >
           by Jacob Eckert.
+          <a href="https://fsd.it/shop/fonts/pragmatapro/">Font</a> by Fabrizio
+          Schiavi Design.
         </small>
       </p>
     </div>
@@ -93,7 +123,7 @@
           worker.onmessage = (evt) => eval(evt.data);
           $target.style.display = "block";
           document.getElementsByTagName("h1")[0].innerHTML =
-            '<img src="favicon.svg"/><br/>formic.id';
+            '<span style="font-size: 400%"></span><br/>formic.id';
         }
       };
 
