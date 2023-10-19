@@ -1,4 +1,4 @@
-from strutils import parseHexInt
+from parseutils import parseHex
 from strformat import `&`
 from algorithm import reversed
 
@@ -29,8 +29,10 @@ proc eval_stor(code: cstring) {.exportc,
       v.add(codeStr[i])
     else:
       break
-  var round = if v.len > 0: parseHexInt(cast[string](v.reversed)) else: 0
+  var round = 0
+  if v.len > 0: discard parseHex(v.reversed, round)
   let newCode = codeStr[0 ..< (codeStr.len - v.len)] & &" {round + 1:x}"
   let prefix = &"Can't evaluate <tt>{codeStr.js_string}</tt> (or anything yet).<br/><i>— Nim code running in wasm in a WebWorker after "
   eval_js(cstring(&"self.postMessage('$target.innerHTML = {prefix.js_string}.concat(\\'{round}\\').concat(\" window roundtrips.</i>\");$worker.postMessage({newCode.js_string})')"))
   echo "end: ", stackBase(), "-", stackCurrent(), "-", stackEnd()
+
