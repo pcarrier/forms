@@ -31,6 +31,6 @@ proc eval_stor(code: cstring) {.exportc,
       break
   var round = if v.len > 0: parseHexInt(cast[string](v.reversed)) else: 0
   let newCode = codeStr[0 ..< (codeStr.len - v.len)] & &" {round + 1:x}"
-  let prefix = &"Can't evaluate <tt>{codeStr.js_string}</tt> (or anything yet).<br/><i>— Nim code running in wasm in a WebWorker after 0x"
-  eval_js(cstring(&"self.postMessage('$target.innerHTML = {prefix.js_string}.concat(\\'{round:x}\\').concat(\" window roundtrips.</i>\");$worker.postMessage({newCode.js_string})')"))
+  let prefix = &"Can't evaluate <tt>{codeStr.js_string}</tt> (or anything yet).<br/><i>— Nim code running in wasm in a WebWorker after "
+  eval_js(cstring(&"self.postMessage('$target.innerHTML = {prefix.js_string}.concat(\\'{round}\\').concat(\" window roundtrips.</i>\");$worker.postMessage({newCode.js_string})')"))
   echo "end: ", stackBase(), "-", stackCurrent(), "-", stackEnd()
