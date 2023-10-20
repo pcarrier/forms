@@ -131,7 +131,7 @@
 
       document.getElementById("bootform").addEventListener("submit", (e) => {
         e.preventDefault();
-        worker.postMessage(document.getElementById("boot").value);
+        worker.postMessage([0, document.getElementById("boot").value]);
       });
     </script>
   </body>

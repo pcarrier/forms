@@ -19,8 +19,8 @@ func js_string(s: string): string =
     else: add(result, c)
   add(result, "\"")
 
-proc eval_stor(code: cstring) {.exportc,
-    codegenDecl: "__attribute__((used)) $# $#$#".} =
+proc sendMsg(slot:int, code: cstring) {.exportc,
+    codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   echo "start: ", stackBase(), "-", stackCurrent(), "-", stackEnd()
   let codeStr = $code
   var v = ""
@@ -33,7 +33,7 @@ proc eval_stor(code: cstring) {.exportc,
   if v.len > 0: discard parseHex(v.reversed, round)
   let newCode = codeStr[0 ..< (codeStr.len - v.len)] & &" {round + 1:x}"
   let prefix = &"Can't evaluate <tt>{codeStr.js_string}</tt> (or anything yet).<br/><i>— Nim code running in wasm in a WebWorker after "
-  eval_js(cstring(&"self.postMessage('$target.innerHTML = {prefix.js_string}.concat(\\'{round}\\').concat(\" window roundtrips.</i>\");$worker.postMessage({newCode.js_string})')"))
+  eval_js(cstring(&"self.postMessage('$target.innerHTML = {prefix.js_string}.concat(\\'{round}\\').concat(\" window roundtrips.</i>\");$worker.postMessage([0, {newCode.js_string}])')"))
   echo "end: ", stackBase(), "-", stackCurrent(), "-", stackEnd()
 
 eval_js(cstring("self.postMessage(undefined)"))
