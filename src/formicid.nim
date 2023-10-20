@@ -35,3 +35,5 @@ proc eval_stor(code: cstring) {.exportc,
   let prefix = &"Can't evaluate <tt>{codeStr.js_string}</tt> (or anything yet).<br/><i>— Nim code running in wasm in a WebWorker after "
   eval_js(cstring(&"self.postMessage('$target.innerHTML = {prefix.js_string}.concat(\\'{round}\\').concat(\" window roundtrips.</i>\");$worker.postMessage({newCode.js_string})')"))
   echo "end: ", stackBase(), "-", stackCurrent(), "-", stackEnd()
+
+eval_js(cstring("self.postMessage(undefined)"))
