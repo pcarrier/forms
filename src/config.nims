@@ -17,8 +17,8 @@ switch("threads", "off")
 switch("w", "on")
 
 switch("d", "danger")
-switch("lineTrace", "on")
-switch("stackTrace", "on")
+switch("lineTrace", "off")
+switch("stackTrace", "off")
 switch("checks", "off")
 
 # -g3 -fsanitize=address

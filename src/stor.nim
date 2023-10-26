@@ -79,7 +79,7 @@ func parse(src: openArray[Token]; i: var int, elided: var bool): Form =
           var f: float64
           if parseFloat(next.sym, f) != len(next.sym):
             raise newException(ParseError, "expected float after #f64")
-          return form(f)
+          return formF64(f)
         of "#f32":
           let next = parse(src, i, elided)
           if next.kind != Sym:
@@ -87,7 +87,7 @@ func parse(src: openArray[Token]; i: var int, elided: var bool): Form =
           var f: float
           if parseFloat(next.sym, f) != len(next.sym):
             raise newException(ParseError, "expected float after #f64")
-          return form(f)
+          return formF32(f)
         of "#f16":
           let next = parse(src, i, elided)
           if next.kind != Sym:

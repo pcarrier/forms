@@ -64,14 +64,15 @@
         color: #888;
       }
 
-      input {
+      input,
+      textarea {
         color: #fff;
         background-color: #111;
         border: 1px solid #ccc;
         font-size: 100%;
       }
 
-      input#boot,
+      textarea#boot,
       pre {
         text-align: left;
         width: 100%;
@@ -96,9 +97,7 @@
       }
 
       table {
-        table-layout: fixed;
-        width: 100%;
-        margin: 0;
+        margin: 0 auto 0 auto;
       }
 
       th,
@@ -142,20 +141,45 @@
         Mostly
         <a href="https://github.com/pcarrier/formicid/blob/main/notes.md"
           >a bunch of notes</a
-        >
-        and vague dreams for now.<br />
+        >, vague dreams. Not pragmatic at all.<br />
         As this is being built live, it's broken at times.
       </p>
       <form id="bootform" style="display: none">
+        <h2>Suggestions</h2>
+        <h3>Tests</h3>
+        <pre><a class="evaluable" href="#boot"
+              >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459 swap &gt;f64 * >u8 ] eval</a></pre>
+        <pre><a class="evaluable" href="#boot"
+          >{ u64-factorial ( #u64 1 swap [ swap over * swap #u64 1 swap - dup #u64 1 < ] do-while drop ) }
+enter
+  #u64 20 u64-factorial
+leave</a></pre>
+        <pre><a class="evaluable" href="#boot"
+          >{ xorshift64*
+  ( dup #u64 0 = [ drop #u64 1 ] when
+    dup #u8 12 swap >> |
+    dup #u8 25 swap << |
+    dup #u8 27 swap >> |
+    #u64 2685821657736338717 * ) }
+enter
+  #u64 0 xorshift64* dup xorshift64* dup xorshift64*
+leave</a></pre>
+        <pre><a class="evaluable" href="#boot"
+  >WIP…</a></pre>
+        <h3>Aspirational</h3>
+        <pre><a class="evaluable" href="#boot"
+              >'/devenv fetch 'body get stor> eval</a></pre>
+        <pre><a class="evaluable" href="#boot"
+              >{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } fetch 'body get cbor> eval</a></pre>
+        <h2>Playground</h2>
         <div id="log"></div>
         <p>
-          <input
-            type="text"
+          <textarea
             id="boot"
-            placeholder="Enter instructions, then press ⏎ or click submit"
-            autofocus
-            onfocus="this.select()"
-          /><br />
+            placeholder="Enter instructions, then press ⌃ + ⏎ or hit submit"
+            rows="1"
+          ></textarea
+          ><br />
           <input type="checkbox" id="tuck" checked /><label for="tuck"
             >tuck</label
           >
@@ -163,31 +187,6 @@
         </p>
 
         <div id="target"></div>
-
-        <h2>Suggestions</h2>
-        <h3>Tests</h3>
-        <pre><a class="evaluable" href="#"
-              >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459
- swap &gt;f64 * >u8 ] eval</a></pre>
-        <pre><a class="evaluable" href="#"
-          >{ u64-factorial ( #u64 1 swap [ swap over * swap #u64 1 swap - dup #u64 1 < ] do-while drop ) } enter 
-#u64 20 u64-factorial 
-leave</a></pre>
-        <pre><a class="evaluable" href="#"
-          >{ xorshift64*
-  ( dup #u64 0 = [ drop #u64 1 ] when
-    dup #u8 12 swap >> |
-    dup #u8 25 swap << |
-    dup #u8 27 swap >> |
-    #u64 2685821657736338717 * ) } 
-enter 
-#u64 0 xorshift64* dup xorshift64* dup xorshift64* 
-leave</a></pre>
-        <h3>Aspirational</h3>
-        <pre><a class="evaluable" href="#"
-              >'/devenv fetch 'body get stor> eval</a></pre>
-        <pre><a class="evaluable" href="#"
-              >{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } fetch 'body get cbor> eval</a></pre>
       </form>
       <footer>
         <cite
@@ -210,10 +209,29 @@ leave</a></pre>
       </footer>
     </div>
     <script>
+      let b = document.getElementById("boot"),
+        t = document.getElementById("tuck"),
+        l = document.getElementById("log"),
+        f = document.getElementById("bootform"),
+        g = document.getElementById("go");
+
+      b.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && e.ctrlKey) {
+          e.preventDefault();
+          g.click();
+        }
+      });
+
+      function bSizeReset() {
+        b.style.height = "0";
+        b.style.height = `${b.scrollHeight}px`;
+      }
+      b.addEventListener("input", bSizeReset);
+
       Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
         c.onclick = (e) => {
-          e.preventDefault();
-          document.getElementById("boot").value = c.textContent;
+          b.value = c.textContent;
+          bSizeReset();
         };
       });
       const worker = new Worker("worker.js");
@@ -225,14 +243,11 @@ leave</a></pre>
           console.log(`Failed loading: ${evt.data}`);
         } else {
           worker.onmessage = (evt) => eval(evt.data);
-          document.getElementById("bootform").style.display = "block";
+          f.style.display = "block";
         }
       };
 
-      let b = document.getElementById("boot"),
-        t = document.getElementById("tuck"),
-        l = document.getElementById("log");
-      document.getElementById("bootform").addEventListener("submit", (e) => {
+      f.addEventListener("submit", (e) => {
         e.preventDefault();
         let log = document.createElement("pre");
         log.textContent = b.value;

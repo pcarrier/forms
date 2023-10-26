@@ -37,10 +37,10 @@ proc html(r: Ref): string =
       result.add("</table>")
 
 proc html(rs: RefDeq): string =
-  result.add(&"<ol>")
+  result.add(&"<table>")
   for r in rs.items:
-    result.add(&"<li>{r.html}</li>")
-  result.add(&"</ol>")
+    result.add(&"<tr><td>{r.html}</td></tr>")
+  result.add(&"</table>")
 
 proc html(vm: VM): string =
   result.add("<table>")

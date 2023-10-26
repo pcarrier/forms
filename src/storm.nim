@@ -5,12 +5,12 @@ type
   State* = enum
     RUNNING, FAULT, HALT
   PCode = enum
-    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, R7 = 7, ENTER = 8, LEAVE = 9, SCLEAR = 10, DCLEAR = 11,
+    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, R7 = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11,
     R12 = 12, R13 = 13, R14 = 14, R15 = 15,
     RECV = 16, SEND = 17, R18 = 18, R19 = 19, R20 = 20, R21 = 21, R22 = 22, R23 = 23,
     PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, R32 = 32,
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
-    DROP = 48, PICK = 49, R50, SWAP = 51, ROT = 52, R53 = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
+    DROP = 48, PICK = 49, R50, SWAP = 51, R52 = 52, R53 = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
     ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68, MOD = 69, DIVMOD = 70, POW = 71, LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81
     TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94
   RefDeq* = Deque[Ref]
@@ -58,10 +58,10 @@ proc add(vm: ptr VM) =
   case a.kind:
   of U64: vm.data.addLast((a.u64 + b.u64).reform)
   of I64: vm.data.addLast((a.i64 + b.i64).reform)
-  of F64: vm.data.addLast((a.f64 + b.f64).reform)
+  of F64: vm.data.addLast((a.f64 + b.f64).formF64.refer)
   of U32: vm.data.addLast((a.u32 + b.u32).reform)
   of I32: vm.data.addLast((a.i32 + b.i32).reform)
-  of F32: vm.data.addLast((a.f32 + b.f32).reform)
+  of F32: vm.data.addLast((a.f32 + b.f32).formF32.refer)
   of U16: vm.data.addLast((a.u16 + b.u16).reform)
   of I16: vm.data.addLast((a.i16 + b.i16).reform)
   of F16: vm.data.addLast((a.f16 + b.f16).formF16.refer)
@@ -84,10 +84,10 @@ proc sub(vm: ptr VM) =
   case a.kind:
   of U64: vm.data.addLast((a.u64 - b.u64).reform)
   of I64: vm.data.addLast((a.i64 - b.i64).reform)
-  of F64: vm.data.addLast((a.f64 - b.f64).reform)
+  of F64: vm.data.addLast((a.f64 - b.f64).formF64.refer)
   of U32: vm.data.addLast((a.u32 - b.u32).reform)
   of I32: vm.data.addLast((a.i32 - b.i32).reform)
-  of F32: vm.data.addLast((a.f32 - b.f32).reform)
+  of F32: vm.data.addLast((a.f32 - b.f32).formF32.refer)
   of U16: vm.data.addLast((a.u16 - b.u16).reform)
   of I16: vm.data.addLast((a.i16 - b.i16).reform)
   of F16: vm.data.addLast((a.f16 - b.f16).formF16.refer)
@@ -118,10 +118,10 @@ proc prod(vm: ptr VM) =
   case a.kind:
   of U64: vm.data.addLast((a.u64 * b.u64).reform)
   of I64: vm.data.addLast((a.i64 * b.i64).reform)
-  of F64: vm.data.addLast((a.f64 * b.f64).reform)
+  of F64: vm.data.addLast((a.f64 * b.f64).formF64.refer)
   of U32: vm.data.addLast((a.u32 * b.u32).reform)
   of I32: vm.data.addLast((a.i32 * b.i32).reform)
-  of F32: vm.data.addLast((a.f32 * b.f32).reform)
+  of F32: vm.data.addLast((a.f32 * b.f32).formF32.refer)
   of U16: vm.data.addLast((a.u16 * b.u16).reform)
   of I16: vm.data.addLast((a.i16 * b.i16).reform)
   of F16: vm.data.addLast((a.f16 * b.f16).formF16.refer)
@@ -497,45 +497,45 @@ proc toF32(vm: ptr VM) =
   if vm.data.len < 1: raise newException(Invalid, "deque underflow")
   let v = vm.data.popLast
   case v.kind
-  of U64: vm.data.addLast(float32(v.u64).reform)
-  of U32: vm.data.addLast(float32(v.u32).reform)
-  of U16: vm.data.addLast(float32(v.u16).reform)
-  of U8: vm.data.addLast(float32(v.u8).reform)
-  of I64: vm.data.addLast(float32(v.i64).reform)
-  of I32: vm.data.addLast(float32(v.i32).reform)
-  of I16: vm.data.addLast(float32(v.i16).reform)
-  of I8: vm.data.addLast(float32(v.i8).reform)
-  of F64: vm.data.addLast(float32(v.f64).reform)
+  of U64: vm.data.addLast(float32(v.u64).formF32.refer)
+  of U32: vm.data.addLast(float32(v.u32).formF32.refer)
+  of U16: vm.data.addLast(float32(v.u16).formF32.refer)
+  of U8: vm.data.addLast(float32(v.u8).formF32.refer)
+  of I64: vm.data.addLast(float32(v.i64).formF32.refer)
+  of I32: vm.data.addLast(float32(v.i32).formF32.refer)
+  of I16: vm.data.addLast(float32(v.i16).formF32.refer)
+  of I8: vm.data.addLast(float32(v.i8).formF32.refer)
+  of F64: vm.data.addLast(float32(v.f64).formF32.refer)
   of F32: vm.data.addLast(v)
-  of F16: vm.data.addLast(float32(v.f16).reform)
-  of Bool: vm.data.addLast(float32(if v.b: 1 else: 0).reform)
+  of F16: vm.data.addLast(float32(v.f16).formF32.refer)
+  of Bool: vm.data.addLast(float32(if v.b: 1 else: 0).formF32.refer)
   of Str:
     var n: float
     if parseFloat(v.str, n) != v.str.len - 1:
       raise newException(Invalid, &"invalid f32 {v}")
-    vm.data.addLast(float32(n).reform)
+    vm.data.addLast(float32(n).formF32.refer)
   else: raise newException(Invalid, &"unsupported kind {v.kind}")
 
 proc toF64(vm: ptr VM) =
   if vm.data.len < 1: raise newException(Invalid, "deque underflow")
   let v = vm.data.popLast
   case v.kind
-  of U64: vm.data.addLast(float64(v.u64).reform)
-  of U32: vm.data.addLast(float64(v.u32).reform)
-  of U16: vm.data.addLast(float64(v.u16).reform)
-  of U8: vm.data.addLast(float64(v.u8).reform)
-  of I64: vm.data.addLast(float64(v.i64).reform)
-  of I32: vm.data.addLast(float64(v.i32).reform)
-  of I16: vm.data.addLast(float64(v.i16).reform)
-  of I8: vm.data.addLast(float64(v.i8).reform)
+  of U64: vm.data.addLast(float64(v.u64).formF64.refer)
+  of U32: vm.data.addLast(float64(v.u32).formF64.refer)
+  of U16: vm.data.addLast(float64(v.u16).formF64.refer)
+  of U8: vm.data.addLast(float64(v.u8).formF64.refer)
+  of I64: vm.data.addLast(float64(v.i64).formF64.refer)
+  of I32: vm.data.addLast(float64(v.i32).formF64.refer)
+  of I16: vm.data.addLast(float64(v.i16).formF64.refer)
+  of I8: vm.data.addLast(float64(v.i8).formF64.refer)
   of F64: vm.data.addLast(v)
-  of F32: vm.data.addLast(float64(v.f32).reform)
-  of F16: vm.data.addLast(float64(v.f16).reform)
-  of Bool: vm.data.addLast(float64(if v.b: 1 else: 0).reform)
+  of F32: vm.data.addLast(float64(v.f32).formF64.refer)
+  of F16: vm.data.addLast(float64(v.f16).formF64.refer)
+  of Bool: vm.data.addLast(float64(if v.b: 1 else: 0).formF64.refer)
   of Str:
     var n: BiggestFloat
     if parseBiggestFloat(v.str, n) != v.str.len - 1: raise newException(Invalid, &"invalid f64 {v}")
-    vm.data.addLast(float64(n).reform)
+    vm.data.addLast(float64(n).formF64.refer)
   else: raise newException(Invalid, &"unsupported kind {v.kind}")
 
 proc toStr(vm: ptr VM) =
@@ -614,9 +614,9 @@ proc eval(vm: ptr VM, c: uint8) =
   of LEAVE:
     if vm.contexts.len < 1: raise newException(Invalid, "deque underflow")
     vm.contexts.popFirst
-  of SCLEAR:
+  of CLEAR_STREAM:
     vm.stream.clear
-  of DCLEAR:
+  of CLEAR_DATA:
     vm.data.clear
   of RECV:
     if vm.stream.len < 1: raise newException(Invalid, "deque underflow")
@@ -694,14 +694,6 @@ proc eval(vm: ptr VM, c: uint8) =
     let b = vm.data.popLast
     vm.data.addLast(a)
     vm.data.addLast(b)
-  of ROT:
-    if vm.data.len < 3: raise newException(Invalid, "deque underflow")
-    let a = vm.data.popLast
-    let b = vm.data.popLast
-    let c = vm.data.popLast
-    vm.data.addLast(b)
-    vm.data.addLast(a)
-    vm.data.addLast(c)
   of ADD: vm.add
   of SUB: vm.sub
   of PROD: vm.prod
@@ -731,7 +723,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_STR: vm.toStr
   of TO_SYM: vm.toSym
   of R7, R12, R13, R14, R15, R18, R19, R20, R21, R22, R23, R26, R27,
-    R28, R29, R32, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R53, R54,
+    R28, R29, R32, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
     raise newException(Invalid, &"illegal primitive {c}")
 
