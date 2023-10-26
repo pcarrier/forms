@@ -169,10 +169,7 @@ proc gt(vm: ptr VM) =
 
 proc eq(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
-  let a = vm.data.popLast
-  let b = vm.data.popLast
-  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch")
-  vm.data.addLast((a == b).reform)
+  vm.data.addLast((vm.data.popLast == vm.data.popLast).reform)
 
 proc le(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
