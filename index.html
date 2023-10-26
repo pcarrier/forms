@@ -73,6 +73,7 @@
 
       input#boot,
       pre {
+        text-align: left;
         width: 100%;
         margin: 0.5em auto 0.5em auto;
       }
@@ -171,6 +172,16 @@
         <pre><a class="evaluable" href="#"
           >{ u64-factorial ( #u64 1 swap [ swap over * swap #u64 1 swap - dup #u64 1 < ] do-while drop ) } enter 
 #u64 20 u64-factorial 
+leave</a></pre>
+        <pre><a class="evaluable" href="#"
+          >{ xorshift64*
+  ( dup #u64 0 = [ drop #u64 1 ] when
+    dup #u8 12 swap >> |
+    dup #u8 25 swap << |
+    dup #u8 27 swap >> |
+    #u64 2685821657736338717 * ) } 
+enter 
+#u64 0 xorshift64* dup xorshift64* dup xorshift64* 
 leave</a></pre>
         <h3>Aspirational</h3>
         <pre><a class="evaluable" href="#"
