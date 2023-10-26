@@ -1,4 +1,4 @@
-import std/[algorithm, deques, parseutils, sequtils, strformat, tables], form, stor, i
+import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, stor, i
 
 type
   Invalid* = object of CatchableError
@@ -211,6 +211,92 @@ proc ge(vm: ptr VM) =
   of U8: vm.data.addLast((a.u8 <= b.u8).reform)
   of I8: vm.data.addLast((a.i8 <= b.i8).reform)
   else: raise newException(Invalid, &"unsupported kind {a.kind}")
+
+
+proc andOp(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow")
+  let a = vm.data.popLast
+  let b = vm.data.popLast
+  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch")
+  case a.kind:
+  of U64: vm.data.addLast(bitand(a.u64, b.u64).reform)
+  of U32: vm.data.addLast(bitand(a.u32, b.u32).reform)
+  of U16: vm.data.addLast(bitand(a.u16, b.u16).reform)
+  of U8: vm.data.addLast(bitand(a.u8, b.u8).reform)
+  of I64: vm.data.addLast(bitand(a.i64, b.i64).reform)
+  of I32: vm.data.addLast(bitand(a.i32, b.i32).reform)
+  of I16: vm.data.addLast(bitand(a.i16, b.i16).reform)
+  of I8: vm.data.addLast(bitand(a.i8, b.i8).reform)
+  of Bool: vm.data.addLast((a.b and b.b).reform)
+  else: raise newException(Invalid, &"unsupported kind {a.kind}")
+
+proc orOp(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow")
+  let a = vm.data.popLast
+  let b = vm.data.popLast
+  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch")
+  case a.kind:
+  of U64: vm.data.addLast(bitor(a.u64, b.u64).reform)
+  of U32: vm.data.addLast(bitor(a.u32, b.u32).reform)
+  of U16: vm.data.addLast(bitor(a.u16, b.u16).reform)
+  of U8: vm.data.addLast(bitor(a.u8, b.u8).reform)
+  of I64: vm.data.addLast(bitor(a.i64, b.i64).reform)
+  of I32: vm.data.addLast(bitor(a.i32, b.i32).reform)
+  of I16: vm.data.addLast(bitor(a.i16, b.i16).reform)
+  of I8: vm.data.addLast(bitor(a.i8, b.i8).reform)
+  of Bool: vm.data.addLast((a.b or b.b).reform)
+  else: raise newException(Invalid, &"unsupported kind {a.kind}")
+
+proc notOp(vm: ptr VM) =
+  if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+  let x = vm.data.popLast
+  case x.kind:
+  of U64: vm.data.addLast(x.u64.bitnot.reform)
+  of U32: vm.data.addLast(x.u32.bitnot.reform)
+  of U16: vm.data.addLast(x.u16.bitnot.reform)
+  of U8: vm.data.addLast(x.u8.bitnot.reform)
+  of I64: vm.data.addLast(x.i64.bitnot.reform)
+  of I32: vm.data.addLast(x.i32.bitnot.reform)
+  of I16: vm.data.addLast(x.i16.bitnot.reform)
+  of I8: vm.data.addLast(x.i8.bitnot.reform)
+  of Bool: vm.data.addLast(x.b.not.reform)
+  else: raise newException(Invalid, &"unsupported kind {x.kind}")
+
+proc shlOp(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow")
+  let x = vm.data.popLast
+  let y = vm.data.popLast
+  let n =
+    try: y[].toInt
+    except: raise newException(Invalid, &"invalid shift {y}")
+  case x.kind:
+  of U64: vm.data.addLast((x.u64 shl n).reform)
+  of U32: vm.data.addLast((x.u32 shl n).reform)
+  of U16: vm.data.addLast((x.u16 shl n).reform)
+  of U8: vm.data.addLast((x.u8 shl n).reform)
+  of I64: vm.data.addLast((x.i64 shl n).reform)
+  of I32: vm.data.addLast((x.i32 shl n).reform)
+  of I16: vm.data.addLast((x.i16 shl n).reform)
+  of I8: vm.data.addLast((x.i8 shl n).reform)
+  else: raise newException(Invalid, &"unsupported kind {x.kind}")
+
+proc shrOp(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow")
+  let x = vm.data.popLast
+  let y = vm.data.popLast
+  let n =
+    try: y[].toInt
+    except: raise newException(Invalid, &"invalid shift {y}")
+  case x.kind:
+  of U64: vm.data.addLast((x.u64 shr n).reform)
+  of U32: vm.data.addLast((x.u32 shr n).reform)
+  of U16: vm.data.addLast((x.u16 shr n).reform)
+  of U8: vm.data.addLast((x.u8 shr n).reform)
+  of I64: vm.data.addLast((x.i64 shr n).reform)
+  of I32: vm.data.addLast((x.i32 shr n).reform)
+  of I16: vm.data.addLast((x.i16 shr n).reform)
+  of I8: vm.data.addLast((x.i8 shr n).reform)
+  else: raise newException(Invalid, &"unsupported kind {x.kind}")
 
 proc toU8(vm: ptr VM) =
   if vm.data.len < 1: raise newException(Invalid, "deque underflow")
@@ -629,8 +715,11 @@ proc eval(vm: ptr VM, c: uint8) =
   of EQ: vm.eq
   of LE: vm.le
   of GE: vm.ge
-  of AND, OR, NOT, SHL, SHR:
-    raise newException(Invalid, &"unsupported operation {c}")
+  of AND: vm.andOp
+  of OR: vm.orOp
+  of NOT: vm.notOp
+  of SHL: vm.shlOp
+  of SHR: vm.shrOp
   of TO_U8: vm.toU8
   of TO_U16: vm.toU16
   of TO_U32: vm.toU32
