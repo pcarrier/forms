@@ -1,4 +1,4 @@
-import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, stor, i
+import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, stor
 
 type
   Invalid* = object of CatchableError
@@ -15,18 +15,19 @@ type
   RefDeq* = Deque[Ref]
   VM* = object
     status*: Status
+    step*: BiggestUInt
     data*: RefDeq
     contexts*: RefDeq
     stream*: RefDeq
 
-proc initVM*(contexts: RefDeq): VM =
-  result.contexts = contexts
-  result.data = initDeque[Ref]()
-  result.stream = initDeque[Ref]()
-
-proc initVM*(context: Ref): VM = initVM([context].toDeque)
-
-let VMs* = @[initVM(I)]
+proc initVM*(): VM =
+  result = VM(
+    status: RUNNING,
+    step: 0,
+    data: initDeque[Ref](),
+    contexts: initDeque[Ref](),
+    stream: initDeque[Ref]()
+  )
 
 proc `$`*(vm: VM): string = &"{vm.data} ← {vm.stream} @ {vm.contexts}"
 
@@ -733,6 +734,7 @@ proc eval(vm: ptr VM, c: uint8) =
     raise newException(Invalid, &"illegal primitive {c}")
 
 proc eval(vm: ptr VM, r: Ref) =
+  vm.step += 1
   case r.kind:
   of Sym:
     let res = vm.lookup(r)
@@ -754,7 +756,22 @@ proc eval(vm: ptr VM, r: Ref) =
   else:
     vm.data.addLast(r)
 
-proc progress(vm: ptr VM) =
+proc advance*(vm: ptr VM, steps: int) =
+  var save: VM
+  vm.status = RUNNING
+  var remaining = steps
+  try:
+    while remaining > 0 and vm.stream.len > 0 and vm.status == RUNNING:
+      save = vm[]
+      let i = vm.stream.popFirst
+      vm.eval(i)
+      remaining -= 1
+  except:
+    vm[] = save
+    vm.status = FAULT
+    raise getCurrentException()
+
+proc advance*(vm: ptr VM) =
   var save: VM
   vm.status = RUNNING
   try:
@@ -767,10 +784,8 @@ proc progress(vm: ptr VM) =
     vm.status = FAULT
     raise getCurrentException()
 
-proc recv*(vm: ptr VM, msgs: openArray[Form]) =
+proc stream_in*(vm: ptr VM, msgs: openArray[Form]) =
   for msg in msgs: vm.stream.addLast(msg.refer)
-  vm.progress
 
-proc tuck*(vm: ptr VM, msgs: openArray[Form]) =
+proc tuck_in*(vm: ptr VM, msgs: openArray[Form]) =
   for msg in msgs.reversed: vm.stream.addFirst(msg.refer)
-  vm.progress

@@ -23,4 +23,4 @@ switch("checks", "off")
 
 # -g3 -fsanitize=address
 switch("passC", "-flto -sENVIRONMENT=web -sNO_EXIT_RUNTIME")
-switch("passL", "-flto -sENVIRONMENT=web -sNO_EXIT_RUNTIME --closure 1 -sEXPORTED_RUNTIME_METHODS=cwrap -sTOTAL_MEMORY=16MB -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=64KB")
+switch("passL", "-flto -sENVIRONMENT=web -sNO_EXIT_RUNTIME --closure 1 -sMODULARIZE -sEXPORTED_RUNTIME_METHODS=cwrap -sTOTAL_MEMORY=16MB -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=64KB")
