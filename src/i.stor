@@ -20,12 +20,12 @@
   dup ( #u8 0 pick )
   over ( #u8 1 pick )
   rot ( [ ] swap push swap push swap push dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
+  #c "Scopes"
+  locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
+  def ( #u8 3 read #u8 2 read ( <contexts pop rot rot set leave %8 #u8 2 discard-stream ) )
   #c "Control flow"
   if    ( [ ] swap push swap push swap >u8 get eval )
   when  ( [ ] if )
   do-while ( [ [ ~do-while~ ] when ] swap + dup >immediate
              { } swap [ ~do-while~ ] pop swap set
-             enter eval leave )
-  #c "Scopes"
-  locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
-  def ( #u8 3 read #u8 2 read ( <contexts pop rot rot set leave %8 #u8 2 discard-stream ) ) }
+             enter eval leave ) }

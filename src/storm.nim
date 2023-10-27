@@ -669,6 +669,14 @@ proc eval(vm: ptr VM, c: uint8) =
       let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
       if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
       vm.data.addLast(c.vec[offset])
+    of Str:
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid str index {k}")
+      if offset < 0 or offset >= c.str.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
+      vm.data.addLast(c.str[offset].reform)
+    of Bin:
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid bin index {k}")
+      if offset < 0 or offset >= c.bin.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
+      vm.data.addLast(c.bin[offset].reform)
     else: raise newException(Invalid, &"kind mismatch: expected map or vec, found {c.kind}")
   of PUSH_DATA:
     vm.data.addLast(toSeq(vm.data.items).reform)
