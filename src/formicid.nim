@@ -15,7 +15,10 @@ proc html(r: Ref): string =
       of U8:
         result.add(&"%{r.tagged.u8}")
       of Vec:
-        result.add(&"(){r.tagged.html}")
+        if r.tagged.vec.len == 0:
+          result.add(&"( )")
+        else:
+          result.add(&"( ){r.tagged.html}")
       else: result.add(&"<span class='tag'>#{r.tag}</span> {r.tagged.html}")
     else:
       result.add(&"<span class='tag'>#{r.tag}</span> {r.tagged.html}")

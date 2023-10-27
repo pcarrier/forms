@@ -146,7 +146,6 @@
       </p>
       <form id="bootform" style="display: none">
         <h2>Suggestions</h2>
-        <h3>Tests</h3>
         <pre><a class="evaluable" href="#boot"
               >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459 swap &gt;f64 * >u8 ] eval</a></pre>
         <pre><a class="evaluable" href="#boot"
@@ -155,17 +154,14 @@ enter
   #u64 20 u64-factorial
 leave</a></pre>
         <pre><a class="evaluable" href="#boot"
-          >{ xorshift64*
-  ( dup #u64 0 = [ drop #u64 1 ] when
-    dup #u8 12 swap >> |
-    dup #u8 25 swap << |
-    dup #u8 27 swap >> |
-    #u64 2685821657736338717 * ) }
-enter
-  #u64 0 xorshift64* dup xorshift64* dup xorshift64*
-leave</a></pre>
+          >locally ( def xorshift64* ( dup #u64 0 = [ drop #u64 1 ] when
+                            dup #u8 12 swap >> |
+                            dup #u8 25 swap << |
+                            dup #u8 27 swap >> |
+                            #u64 2685821657736338717 * )
+          #u64 0 xorshift64* dup xorshift64* dup xorshift64* )</a></pre>
         <pre><a class="evaluable" href="#boot"
-  >WIP…</a></pre>
+  >'Next\ up?</a></pre>
         <h3>Aspirational</h3>
         <pre><a class="evaluable" href="#boot"
               >'/devenv fetch 'body get stor> eval</a></pre>
