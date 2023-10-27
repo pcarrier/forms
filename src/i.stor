@@ -4,6 +4,7 @@
   untag %5  tag %6
   enter %8  leave %9  clear-stream %10  clear-data %11
   #c [ 'TODO recv %16  send %17 ]
+  read %20  discard-stream %21
   push %24  pop %25  set %30  get %31
   <data %33  <stream %34  <contexts %35
   drop %48  pick %49  swap %51
@@ -22,6 +23,9 @@
   #c "Control flow"
   if    ( [ ] swap push swap push swap >u8 get eval )
   when  ( [ ] if )
-  do-while ( [ [ ~while~ ] when ] swap + dup >immediate
-             { } swap [ ~while~ ] pop swap set
-             enter eval leave ) }
+  do-while ( [ [ ~do-while~ ] when ] swap + dup >immediate
+             { } swap [ ~do-while~ ] pop swap set
+             enter eval leave )
+  #c "Scopes"
+  locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
+  def ( #u8 3 read #u8 2 read ( <contexts pop rot rot set leave %8 #u8 2 discard-stream ) ) }

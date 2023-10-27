@@ -2,12 +2,11 @@ import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables],
 
 type
   Invalid* = object of CatchableError
-  State* = enum
+  Status* = enum
     RUNNING, FAULT, HALT
   PCode = enum
-    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, R7 = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11,
-    R12 = 12, R13 = 13, R14 = 14, R15 = 15,
-    RECV = 16, SEND = 17, R18 = 18, R19 = 19, R20 = 20, R21 = 21, R22 = 22, R23 = 23,
+    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, R7 = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11, R12 = 12, R13 = 13, R14 = 14, R15 = 15,
+    RECV = 16, SEND = 17, R18 = 18, R19 = 19, READ = 20, DISCARD_STREAM = 21, R22 = 22, R23 = 23,
     PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, R32 = 32,
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
     DROP = 48, PICK = 49, R50, SWAP = 51, R52 = 52, R53 = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
@@ -15,7 +14,7 @@ type
     TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94
   RefDeq* = Deque[Ref]
   VM* = object
-    state*: State
+    status*: Status
     data*: RefDeq
     contexts*: RefDeq
     stream*: RefDeq
@@ -36,8 +35,7 @@ proc lookup(vm: ptr VM, r: Ref): ptr Ref
 proc lookup(vm: ptr VM, ctx: Ref, r: Ref): ptr Ref =
   case ctx.kind:
   of Map:
-    try: return ctx.map[r].addr
-    except: return nil
+    try: return ctx.map[r].addr except: return nil
   # TODO: vecs?
   else:
     let c = vm.lookup(ctx)
@@ -263,9 +261,7 @@ proc shlOp(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
   let x = vm.data.popLast
   let y = vm.data.popLast
-  let n =
-    try: y[].toInt
-    except: raise newException(Invalid, &"invalid shift {y}")
+  let n = try: y[].toInt except: raise newException(Invalid, &"invalid shift {y}")
   case x.kind:
   of U64: vm.data.addLast((x.u64 shl n).reform)
   of U32: vm.data.addLast((x.u32 shl n).reform)
@@ -281,9 +277,7 @@ proc shrOp(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
   let x = vm.data.popLast
   let y = vm.data.popLast
-  let n =
-    try: y[].toInt
-    except: raise newException(Invalid, &"invalid shift {y}")
+  let n = try: y[].toInt except: raise newException(Invalid, &"invalid shift {y}")
   case x.kind:
   of U64: vm.data.addLast((x.u64 shr n).reform)
   of U32: vm.data.addLast((x.u32 shr n).reform)
@@ -587,7 +581,7 @@ proc toSym(vm: ptr VM) =
 
 proc eval(vm: ptr VM, c: uint8) =
   case PCode(c):
-  of HALT: vm.state = HALT
+  of HALT: vm.status = HALT
   of NOOP: discard
   of EVAL:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
@@ -618,10 +612,20 @@ proc eval(vm: ptr VM, c: uint8) =
     vm.stream.clear
   of CLEAR_DATA:
     vm.data.clear
-  of RECV:
+  of RECV, SEND: raise newException(Invalid, &"we don't know how to send yet") # FIXME
+  of READ:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let f = vm.data.popLast
+    let n = try: f[].toInt except: raise newException(Invalid, &"invalid read size {f}")
+    if n < 0 or n >= vm.stream.len: raise newException(Invalid, &"index out of bounds {n}")
+    vm.data.addLast(vm.stream[n])
+  of DISCARD_STREAM:
     if vm.stream.len < 1: raise newException(Invalid, "deque underflow")
-    vm.data.addLast(vm.stream.popFirst)
-  of SEND: raise newException(Invalid, &"we don't know how to send yet") # FIXME
+    let f = vm.data.popLast
+    let n = try: f[].toInt except: raise newException(Invalid, &"invalid discard size {f}")
+    echo "oops", n, vm.stream.len
+    if n < 0 or n > vm.stream.len: raise newException(Invalid, &"index out of bounds {n}")
+    for i in 1 .. n: vm.stream.popFirst
   of PUSH:
     if vm.data.len < 2: raise newException(Invalid, "deque underflow")
     let x = vm.data.popLast
@@ -647,10 +651,8 @@ proc eval(vm: ptr VM, c: uint8) =
       res.map[k] = v
       vm.data.addLast(res.refer)
     of Vec:
-      let offset =
-        try: k[].toInt
-        except: raise newException(Invalid, &"invalid vec index {k}")
-      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {k} in {c}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
+      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
       var res = c[]
       res.vec[offset] = v
       vm.data.addLast(res.refer)
@@ -662,13 +664,10 @@ proc eval(vm: ptr VM, c: uint8) =
     let c = vm.data.popLast
     case c.kind:
     of Map:
-      try: vm.data.addLast(c.map[k])
-      except: raise newException(Invalid, &"key not found {k} in {c}")
+      try: vm.data.addLast(c.map[k]) except: raise newException(Invalid, &"key not found {k} in {c}")
     of Vec:
-      let offset =
-        try: k[].toInt
-        except: raise newException(Invalid, &"invalid vec index {k}")
-      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {k} in {c}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
+      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
       vm.data.addLast(c.vec[offset])
     else: raise newException(Invalid, &"kind mismatch: expected map or vec, found {c.kind}")
   of PUSH_DATA:
@@ -683,9 +682,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of PICK:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     let f = vm.data.popLast
-    let n =
-      try: f[].toInt
-      except: raise newException(Invalid, &"invalid index {f}")
+    let n = try: f[].toInt except: raise newException(Invalid, &"invalid index {f}")
     if n >= vm.data.len: raise newException(Invalid, &"index out of bounds {f}")
     vm.data.addLast(vm.data[^(n + 1)])
   of SWAP:
@@ -722,7 +719,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_F64: vm.toF64
   of TO_STR: vm.toStr
   of TO_SYM: vm.toSym
-  of R7, R12, R13, R14, R15, R18, R19, R20, R21, R22, R23, R26, R27,
+  of R7, R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
     R28, R29, R32, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
     raise newException(Invalid, &"illegal primitive {c}")
@@ -751,15 +748,15 @@ proc eval(vm: ptr VM, r: Ref) =
 
 proc progress(vm: ptr VM) =
   var save: VM
-  vm.state = RUNNING
+  vm.status = RUNNING
   try:
-    while vm.stream.len > 0 and vm.state == RUNNING:
+    while vm.stream.len > 0 and vm.status == RUNNING:
       save = vm[]
       let i = vm.stream.popFirst
       vm.eval(i)
   except:
     vm[] = save
-    vm.state = FAULT
+    vm.status = FAULT
     raise getCurrentException()
 
 proc recv*(vm: ptr VM, msgs: openArray[Form]) =
