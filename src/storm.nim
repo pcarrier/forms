@@ -77,8 +77,8 @@ proc add(vm: ptr VM) =
 
 proc sub(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
-  let a = vm.data.popLast
   let b = vm.data.popLast
+  let a = vm.data.popLast
   if a.kind != b.kind: raise newException(Invalid, &"kind mismatch")
   case a.kind:
   of U64: vm.data.addLast((a.u64 - b.u64).reform)
