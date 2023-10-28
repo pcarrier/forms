@@ -2,7 +2,6 @@
 /nimcache/
 /testresults/
 
-/formicid
-/formicid.wasm
+/web/
 /tests/sss/tsss
 /tests/stor/tstor

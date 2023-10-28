@@ -1,4 +1,4 @@
-import std/[deques, strformat, strutils, tables], build, sss, form, stor, storm, js
+import std/[deques, strformat, strutils, tables], ../[build, sss, form, stor, storm], js
 
 type
   ElidedError* = object of CatchableError
