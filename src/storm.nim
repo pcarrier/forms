@@ -624,7 +624,6 @@ proc eval(vm: ptr VM, c: uint8) =
     if vm.stream.len < 1: raise newException(Invalid, "deque underflow")
     let f = vm.data.popLast
     let n = try: f[].toInt except: raise newException(Invalid, &"invalid discard size {f}")
-    echo "oops", n, vm.stream.len
     if n < 0 or n > vm.stream.len: raise newException(Invalid, &"index out of bounds {n}")
     for i in 1 .. n: vm.stream.popFirst
   of PUSH:
