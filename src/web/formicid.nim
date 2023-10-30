@@ -95,9 +95,8 @@ proc advance(slot: int, steps: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIV
       jsEval(cstring(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')"))
       return
   try:
-    if steps < 0: vm.advance
-    else: vm.advance(steps)
-    display(vm)
+    if steps < 0: vm.advance(display)
+    else: vm.advance(steps, display)
   except Invalid:
     reportError(&"Invalid: {getCurrentExceptionMsg()}", vm[])
   except:

@@ -755,7 +755,7 @@ proc eval(vm: ptr VM, r: Ref) =
   else:
     vm.data.addLast(r)
 
-proc advance*(vm: ptr VM, steps: int) =
+proc advance*(vm: ptr VM, steps: int, receiver: proc (vm: ptr VM): void) =
   var save: VM
   vm.status = RUNNING
   var remaining = steps
@@ -764,13 +764,14 @@ proc advance*(vm: ptr VM, steps: int) =
       save = vm[]
       let i = vm.stream.popFirst
       vm.eval(i)
+      receiver(vm)
       remaining -= 1
   except:
     vm[] = save
     vm.status = FAULT
     raise getCurrentException()
 
-proc advance*(vm: ptr VM) =
+proc advance*(vm: ptr VM, receiver: proc (vm: ptr VM): void) =
   var save: VM
   vm.status = RUNNING
   try:
@@ -778,6 +779,7 @@ proc advance*(vm: ptr VM) =
       save = vm[]
       let i = vm.stream.popFirst
       vm.eval(i)
+      receiver(vm)
   except:
     vm[] = save
     vm.status = FAULT

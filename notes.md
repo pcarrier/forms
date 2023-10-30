@@ -2,7 +2,6 @@ Dabbling at a formulaic format forming formidable formalisms.
 
 ## TODO
 
-- Update the VM on every instruction
 - `>stor`, `>stor`
 - `>cbor`, `cbor>`
 - `stor2cbor`, `cbor2stor`
