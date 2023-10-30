@@ -1,5 +1,17 @@
 Dabbling at a formulaic format forming formidable formalisms.
 
+## TODO
+
+- Update the VM on every instruction
+- `>stor`, `>stor`
+- `>cbor`, `cbor>`
+- `stor2cbor`, `cbor2stor`
+- `>json`, `json>`
+- `json2stor`, `stor2json`
+- `while`
+- bf interpreter
+
+
 ## FORM Open Representation Model (FORM)
 
 _*Status:* memory ready, STOR printing elides cycles and STOR parsing reports them_
