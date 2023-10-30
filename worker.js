@@ -4,7 +4,7 @@
     const module = await Module();
     const send = module.cwrap("recv", null, ["number", "number", "string"]),
       advance = module.cwrap("advance", null, ["number", "number"]),
-      bootstrap = await (await fetch("i.stor")).text();
+      stork = await (await fetch("stork.stor")).text();
     onmessage = (evt) => {
       const [slot, ...rest] = evt.data;
       rest.forEach((x) => {
@@ -19,7 +19,7 @@
         }
       });
     };
-    send(0, 0, bootstrap);
+    send(0, 0, stork);
     advance(0, -1);
   } catch (e) {
     postMessage(e);
