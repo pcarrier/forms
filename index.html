@@ -129,31 +129,31 @@
   </head>
 
   <body>
-    <div id="root">
-      <h1><img src="favicon.svg" /><br />formic<span>.id</span></h1>
-      <p>
-        The <tt>formic</tt> languages are in their infancy. Intended to be
-        <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)"
-          >interpreted</a
-        >
-        on the Web, behind and beyond.<br />Interactive, dynamic,
-        <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a> and
-        built on immutable data structures in bijection with
-        <a href="https://cbor.io">CBOR</a>.<br />
-        Mostly
-        <a href="https://github.com/pcarrier/formicid/blob/main/README.md"
-          >a bunch of documents</a
-        >
-        and vague aspirations. Not pragmatic at all, and horrendously slow.<br />
-        As it is being built live by coding &amp; building on this machine, it's
-        broken at times.<br />
-        Fewer than 70kB of wasm bootstrapped with
-        <a href="stork.stor">stork</a> for a simple vocabulary.<br />
-        Inspired by <a href="https://pcarrier.com/words">words</a>,
-        <a href="https://h3rald.com/mn/">mn</a>,
-        <a href="https://clojure.org/">Clojure</a>.
-      </p>
-      <form id="stream" style="display: none">
+    <h1><img src="favicon.svg" /><br />formic<span>.id</span></h1>
+    <p>
+      The <tt>formic</tt> languages are in their infancy. Intended to be
+      <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)"
+        >interpreted</a
+      >
+      on the Web, behind and beyond.<br />Interactive, dynamic,
+      <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a> and
+      built on immutable data structures in bijection with
+      <a href="https://cbor.io">CBOR</a>.<br />
+      Mostly
+      <a href="https://github.com/pcarrier/formicid/blob/main/README.md"
+        >a bunch of documents</a
+      >
+      and vague aspirations. Not pragmatic at all, and horrendously slow.<br />
+      As it is being built live by coding &amp; building on this machine, it's
+      broken at times.<br />
+      Fewer than 70kB of wasm bootstrapped with
+      <a href="stork.stor">stork</a> for a simple vocabulary.<br />
+      Inspired by <a href="https://pcarrier.com/words">words</a>,
+      <a href="https://h3rald.com/mn/">mn</a>,
+      <a href="https://clojure.org/">Clojure</a>.
+    </p>
+    <div id="root" style="display: none">
+      <form id="stream">
         <h2>Suggestions</h2>
         <pre><a class="evaluable" href="#"
               >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459 swap &gt;f64 * >u8 ] eval</a></pre>
@@ -194,40 +194,41 @@ leave</a></pre>
           >
           <input type="submit" id="go" value="submit" style="font-size: 100%" />
         </p>
-        <p>
-          <button onclick="step()">step</button>
-          <input id="steps" type="number" value="1" /> or
-          <button onclick="$worker.postMessage([0, [-1, -1]])">run</button>
-        </p>
       </form>
-      <div id="target"></div>
-      <footer>
-        <cite
-          >Je vous écris une longue lettre parce que je n'ai pas le temps d'en
-          écrire une courte. — Blaise Pascal</cite
-        >
-        <br />
-        © 2023 <a href="https://pcarrier.com/">Pierre Carrier</a>.
-        <a href="https://github.com/pcarrier/forms">Code</a> licensed under
-        <a
-          href="https://raw.githubusercontent.com/pcarrier/formicid/main/LICENSE.md"
-          >Zero-Clause BSD</a
-        >.
-        <a href="https://en.wikipedia.org/wiki/File:Ant_(Jacob_Eckert).svg"
-          >Logo</a
-        >
-        by Jacob Eckert.
-        <a href="https://fsd.it/shop/fonts/pragmatapro/">Font</a> by Fabrizio
-        Schiavi Design.
-      </footer>
+      <p>
+        <button onclick="step()">step</button>
+        <input id="steps" type="number" value="1" /> or
+        <button onclick="$worker.postMessage([0, [-1, -1]])">run</button>
+      </p>
     </div>
+    <div id="target"></div>
+    <footer>
+      <cite
+        >Je vous écris une longue lettre parce que je n'ai pas le temps d'en
+        écrire une courte. — Blaise Pascal</cite
+      >
+      <br />
+      © 2023 <a href="https://pcarrier.com/">Pierre Carrier</a>.
+      <a href="https://github.com/pcarrier/forms">Code</a> licensed under
+      <a
+        href="https://raw.githubusercontent.com/pcarrier/formicid/main/LICENSE.md"
+        >Zero-Clause BSD</a
+      >.
+      <a href="https://en.wikipedia.org/wiki/File:Ant_(Jacob_Eckert).svg"
+        >Logo</a
+      >
+      by Jacob Eckert.
+      <a href="https://fsd.it/shop/fonts/pragmatapro/">Font</a> by Fabrizio
+      Schiavi Design.
+    </footer>
     <script>
-      let s = document.getElementById("stream"),
+      let r = document.getElementById("root"),
+        s = document.getElementById("stream"),
         i = document.getElementById("instructions"),
         t = document.getElementById("tuck"),
+        l = document.getElementById("log"),
         run = document.getElementById("run"),
         steps = document.getElementById("steps");
-      (l = document.getElementById("log")), (g = document.getElementById("go"));
 
       i.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && e.ctrlKey) {
@@ -262,7 +263,7 @@ leave</a></pre>
           console.log(`Failed loading: ${evt.data}`);
         } else {
           worker.onmessage = (evt) => eval(evt.data);
-          s.style.display = "block";
+          r.style.display = "block";
         }
       };
 
