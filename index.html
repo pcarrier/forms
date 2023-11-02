@@ -158,7 +158,7 @@
         <pre><a class="evaluable" href="#"
               >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459 swap &gt;f64 * >u8 ] eval</a></pre>
         <pre><a class="evaluable" href="#"
-          >{ u64-factorial ( #u64 1 swap [ swap over * swap #u64 1 - dup #u64 1 &gt; ] do-while drop ) }
+          >{ u64-factorial ( #u64 1 [ over #u64 1 &gt; ] [ over * swap #u64 1 - swap ] while swap drop ) }
 enter
   #u64 20 u64-factorial
 leave</a></pre>

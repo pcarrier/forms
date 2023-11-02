@@ -32,4 +32,7 @@
   when  ( [ ] if )
   do-while ( [ [ ~do-while~ ] when ] swap + dup >immediate
              { } swap [ ~do-while~ ] pop swap set
-             enter eval leave ) } %8
+             enter eval leave ) 
+  while ( [ ~while~ ] swap + push [ when ] swap + dup >immediate
+          { } swap [ ~while~ ] pop swap set
+          enter eval leave ) } %8
