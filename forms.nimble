@@ -10,3 +10,6 @@ requires "nim >= 2.0.0"
 
 task test, "Run test suite":
   exec "testament --megatest:off all"
+
+task serve, "Run an HTTP server":
+  exec "python -mhttp.server"
