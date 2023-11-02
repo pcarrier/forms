@@ -7,7 +7,6 @@ Dabbling at a formulaic format forming formidable formalisms.
 - `stor2cbor`, `cbor2stor`
 - `>json`, `json>`
 - `json2stor`, `stor2json`
-- `while`
 - bf interpreter
 
 
