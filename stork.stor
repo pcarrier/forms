@@ -30,9 +30,9 @@
   #c "Control flow"
   if    ( [ ] swap push swap push swap >u8 get eval )
   when  ( [ ] if )
-  do-while ( [ [ ~do-while~ ] when ] swap + dup >immediate
+  do-while ( [ [ ~do-while~ ] when ] + dup >immediate
              { } swap [ ~do-while~ ] pop swap set
              enter eval leave ) 
-  while ( [ ~while~ ] swap + push [ when ] swap + dup >immediate
+  while ( [ ~while~ ] + push [ when ] + dup >immediate
           { } swap [ ~while~ ] pop swap set
           enter eval leave ) } %8
