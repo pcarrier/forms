@@ -1,4 +1,4 @@
-Copyright (c) 2023 Pierre Carrier
+Copyright (c) 2023 forms contributors <https://github.com/pcarrier/forms/graphs/contributors>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted.
