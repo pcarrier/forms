@@ -54,19 +54,22 @@ proc html(vm: VM): string =
   result.add("</table>")
 
 proc reportError(msg: string, vm: VM) =
-  let js = &"self.postMessage('$target.innerHTML = \\'<em>{msg.jsString(2, true, false)}</em>{vm.html.jsString(2, false, false)}\\'')"
-  jsEval(cstring(js))
+  jsEval(&"self.postMessage('$target.innerHTML = \\'<em>{msg.jsString(2, true, false)}</em>{vm.html.jsString(2, false, false)}\\'')")
 
 proc display(vm: ptr VM) =
   let state = vm[].html
-  let jsCode = &"self.postMessage('$target.innerHTML = {state.jsString(1, false, true)}')"
-  jsEval(cstring(jsCode))
+  jsEval(&"self.postMessage('$target.innerHTML = {state.jsString(1, false, true)}')")
+
+{.emit: """
+#include <emscripten.h>
+""".}
+
 
 proc recv(slot: int, msgType: int, msg: cstring) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   var vm =
     try: VMs[slot].addr
     except KeyError:
-      jsEval(cstring(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')"))
+      jsEval(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')")
       return
   case msgType:
   of 0, 1:
@@ -92,15 +95,22 @@ proc advance(slot: int, steps: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIV
   var vm =
     try: VMs[slot].addr
     except KeyError:
-      jsEval(cstring(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')"))
+      jsEval(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')")
       return
   try:
-    if steps < 0: vm.advance(display)
-    else: vm.advance(steps, display)
+    if steps < 0: vm.advance()
+    else: vm.advance(steps)
   except Invalid:
     reportError(&"Invalid: {getCurrentExceptionMsg()}", vm[])
   except:
     reportError(&"Unhandled exception: {getCurrentExceptionMsg()}", vm[])
 
+proc displayVM(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
+  var vm =
+    try: VMs[slot].addr
+    except KeyError:
+      return
+  display(vm)
+
 echo &"formic.id build {buildDescr}"
-jsEval(cstring("self.postMessage(undefined)"))
+jsEval("self.postMessage(undefined)")

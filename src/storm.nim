@@ -739,7 +739,7 @@ proc eval(vm: ptr VM, r: Ref) =
     let res = vm.lookup(r)
     if res.isNil: raise newException(Invalid, &"undefined symbol {r}")
     else:
-      vm.eval(res[])
+      vm.stream.addFirst(res[])
   of Tag:
     if r.tag == CODE_TAG:
       case r.tagged.kind
@@ -755,23 +755,21 @@ proc eval(vm: ptr VM, r: Ref) =
   else:
     vm.data.addLast(r)
 
-proc advance*(vm: ptr VM, steps: int, receiver: proc (vm: ptr VM): void) =
+proc advance*(vm: ptr VM, steps: int) =
   var save: VM
   vm.status = RUNNING
-  var remaining = steps
+  let stop_at = vm[].step + steps.BiggestUInt
   try:
-    while remaining > 0 and vm.stream.len > 0 and vm.status == RUNNING:
+    while vm.step <= stop_at and vm.stream.len > 0 and vm.status == RUNNING:
       save = vm[]
       let i = vm.stream.popFirst
       vm.eval(i)
-      receiver(vm)
-      remaining -= 1
   except:
     vm[] = save
     vm.status = FAULT
     raise getCurrentException()
 
-proc advance*(vm: ptr VM, receiver: proc (vm: ptr VM): void) =
+proc advance*(vm: ptr VM) =
   var save: VM
   vm.status = RUNNING
   try:
@@ -779,7 +777,6 @@ proc advance*(vm: ptr VM, receiver: proc (vm: ptr VM): void) =
       save = vm[]
       let i = vm.stream.popFirst
       vm.eval(i)
-      receiver(vm)
   except:
     vm[] = save
     vm.status = FAULT

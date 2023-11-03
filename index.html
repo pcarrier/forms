@@ -135,10 +135,11 @@
         écrire une courte. — Blaise Pascal</cite
       >
       <br />
-      © 2023 <a href="https://github.com/pcarrier/forms/graphs/contributors">forms contributors</a>.
-      <a href="https://github.com/pcarrier/forms">Code</a> licensed under
-      <a
-        href="https://raw.githubusercontent.com/pcarrier/forms/main/LICENSE.md"
+      © 2023
+      <a href="https://github.com/pcarrier/forms/graphs/contributors"
+        >forms contributors</a
+      >. <a href="https://github.com/pcarrier/forms">Code</a> licensed under
+      <a href="https://raw.githubusercontent.com/pcarrier/forms/main/LICENSE.md"
         >Zero-Clause BSD</a
       >.
       <a href="https://en.wikipedia.org/wiki/File:Ant_(Jacob_Eckert).svg"
@@ -146,7 +147,10 @@
       >
       by Jacob Eckert.
       <a href="https://fsd.it/shop/fonts/pragmatapro/">Font</a> by Fabrizio
-      Schiavi Design. <a href="https://discord.gg/BhqV2zJD">#formic on the concatenative Discord</a>
+      Schiavi Design.
+      <a href="https://discord.gg/BhqV2zJD"
+        >#formic on the concatenative Discord</a
+      >
     </header>
     <h1><img src="favicon.svg" /><br />formic<span>.id</span></h1>
     <p>
@@ -213,9 +217,9 @@ leave</a></pre>
         </p>
       </form>
       <p>
-        <button onclick="step()">step</button>
-        <input id="steps" type="number" value="1" /> or
-        <button onclick="$worker.postMessage([0, [-1, -1]])">run</button>
+        <button onclick="step()">step</button> or
+        <button onclick="run()">run</button>
+        <input id="steps" type="number" value="10000" step="10000"/> instructions(/frame)
       </p>
     </div>
     <div id="target"></div>
@@ -226,7 +230,7 @@ leave</a></pre>
         t = document.getElementById("tuck"),
         l = document.getElementById("log"),
         g = document.getElementById("go"),
-        run = document.getElementById("run"),
+        runImmediately = document.getElementById("run"),
         steps = document.getElementById("steps");
 
       i.addEventListener("keydown", (e) => {
@@ -249,18 +253,23 @@ leave</a></pre>
         };
       });
 
-      function step() {
-        $worker.postMessage([0, [-1, steps.value]]);
-      }
-
       const worker = new Worker("worker.js");
       window.$worker = worker;
       window.$target = document.getElementById("target");
+      window.$refresh = false;
       // First message indicates the worker has started.
       worker.onmessage = (evt) => {
         if (evt.data) {
           console.log(`Failed loading: ${evt.data}`);
         } else {
+          const raf = () => {
+            if ($refresh) {
+              worker.postMessage([0, [-1, steps.value]]);
+              worker.postMessage([0, [-2]]);
+            }
+            requestAnimationFrame(raf);
+          };
+          requestAnimationFrame(raf);
           worker.onmessage = (evt) => eval(evt.data);
           r.style.display = "block";
         }
@@ -272,10 +281,18 @@ leave</a></pre>
         log.textContent = i.value;
         l.appendChild(log);
         worker.postMessage([0, [Number(t.checked), i.value]]);
-        if (run.checked) {
-          worker.postMessage([0, [-1, -1]]);
+        if (runImmediately.checked) {
+          run();
         }
       });
+
+      function step() {
+        $worker.postMessage([0, [-1, steps.value]]);
+      }
+
+      function run() {
+        $refresh = true;
+      }
     </script>
   </body>
 </html>

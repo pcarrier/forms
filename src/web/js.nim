@@ -26,4 +26,8 @@ func jsString*(s: string, depth: uint8, replaceHTML: bool, externalQuotes: bool)
     result.add(repeat('\\', repeatsOnQuotesAround))
     result.add('\'')
 
-proc jsEval*(code: cstring) {.header: "<emscripten.h>", importc: "emscripten_run_script".}
+proc emscripten_run_script(code: cstring) {.header: "<emscripten.h>", importc: "emscripten_run_script".}
+
+proc jsEval*(code: string) =
+  # echo "jsEval: ", cstring(code)
+  emscripten_run_script(cstring(code))
