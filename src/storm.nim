@@ -51,20 +51,23 @@ proc lookup(vm: ptr VM, ctx: Ref, r: Ref): ptr Ref =
   case ctx.kind:
   of Map:
     try: return ctx.map[r].addr except: return nil
-  of Sym:
+  of Tag:
     if ctx.tag == CODE_TAG and ctx.tagged.kind == Vec:
       var nvm = initVM()
       nvm.data.addFirst(r)
-      nvm.contexts = vm.contexts
+      for octx in vm.contexts:
+        if octx != ctx:
+          nvm.contexts.addLast(octx)
       nvm.stream = ctx.tagged.vec.toDeque()
       nvm.addr.advance()
-      if nvm.status == HALT and nvm.data.len == 1:
-        return nvm.data[0].addr
+      if nvm.status == HALT and nvm.data.len > 0:
+        return nvm.data[^1].addr
       else:
-        raise newException(Invalid, &"lookup failed: {nvm}")
+        return nil
   else: discard
   let c = vm.lookup(ctx)
-  if c != nil: result = vm.lookup(c[], r)
+  if c != nil: return vm.lookup(c[], r)
+  return nil
 
 proc lookup(vm: ptr VM, r: Ref): ptr Ref =
   for ctx in vm.contexts:

@@ -41,8 +41,8 @@ Look ups traverse the context stack from top to bottom until a form is found. If
 
 Each context is looked up based on its type:
 - Maps are looked up by key;
-- (Still thinking about this…) Vectors are evaluated as a stream in a copy of the machine; when it halts, a grown stack indicates a look up result at its top;
-- Other values are recursively looked up themselves.
+- Vectors are evaluated as a stream in a machine with the same contexts except this one, starting with the looked up value on the data stack; if it halts, its top is the result.
+- Everything else is looked up recursively first.
 
 ## Eye of the STORM (I)
 
