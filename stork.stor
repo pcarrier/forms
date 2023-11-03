@@ -1,5 +1,5 @@
 { #c "Internals and primitives."
-  code-tag #u64 6
+  CodeTag #u64 6
   halt %0  noop %1  eval %2  kind %3  size %4
   untag %5  tag %6
   fault %7  enter %8  leave %9  clear-stream %10  clear-data %11
@@ -33,7 +33,7 @@
   f? ( kind #u8 4 >> 4 #u8 3 = )
 
   #c "Code in and out"
-  >immediate ( code-tag tag )
+  >immediate ( CodeTag tag )
   immediate> ( kind 0 = [ untag swap drop ] [ halt ] if )
 
   #c "Stack manipulation"
