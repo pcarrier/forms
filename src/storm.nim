@@ -624,6 +624,14 @@ proc toVec(vm: ptr VM) =
     var res = newSeq[Ref]()
     for (k, v) in v.map.pairs: res.add([k, v].toSeq().reform)
     vm.data.addLast(res.form.refer)
+  of Str:
+    var res = newSeq[Ref]()
+    for c in v.str: res.add(uint8(c).reform)
+    vm.data.addLast(res.form.refer)
+  of Bin:
+    var res = newSeq[Ref]()
+    for c in v.bin: res.add(uint8(c).reform)
+    vm.data.addLast(res.form.refer)
   else: raise newException(Invalid, &"unsupported kind {v.kind}")
 
 proc eval(vm: ptr VM, c: uint8) =
