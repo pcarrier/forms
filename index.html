@@ -278,8 +278,7 @@ leave</a></pre>
         } else {
           const raf = () => {
             if ($refresh) {
-              worker.postMessage([0, [-1, ipf.value]]);
-              worker.postMessage([0, [-2]]);
+              worker.postMessage([0, [-1, ipf.value], [-2]]);
             }
             requestAnimationFrame(raf);
           };
@@ -303,8 +302,7 @@ leave</a></pre>
       });
 
       function step() {
-        $worker.postMessage([0, [-1, steps.value]]);
-        $worker.postMessage([0, [-2]]);
+        $worker.postMessage([0, [-1, steps.value], [-2]]);
       }
     </script>
   </body>
