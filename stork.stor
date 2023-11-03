@@ -1,5 +1,4 @@
-{ #c "Internals and primitives."
-  CodeTag #u64 6
+{ #c "Primitives."
   halt %0  noop %1  eval %2  kind %3  size %4
   untag %5  tag %6
   fault %7  enter %8  leave %9  clear-stream %10  clear-data %11
@@ -17,18 +16,21 @@
   >f16 %90  >f32 %91  >f64 %92
   >str %93  >sym %94  >bin %95  >vec %96
 
-  #c 'Kinds
-  Tag #u8 0
-  Undef #u8 1  Null #u8 2  Bool #u8 3
-  Sym #u8 8  Str #u8 9  Bin #u8 10
-  Vec #u8 11  Map #u8 12
-  U64 #u8 16  U32 #u8 17  U16 #u8 18  U8 #u8 19
-  I64 #u8 32  I32 #u8 33  I16 #u8 34  I8 #u8 35
-  F64 #u8 48  F32 #u8 49  F16 #u8 50
+  #c 'Constants
+  CodeTag #u64 6
+  TagKind #u8 0
+  UndefKind #u8 1  NullKind #u8 2  BoolKind #u8 3
+  SymKind #u8 8  StrKind #u8 9  BinKind #u8 10
+  VecKind #u8 11  MapKind #u8 12
+  U64Kind #u8 16  U32Kind #u8 17  U16Kind #u8 18  U8Kind #u8 19
+  I64Kind #u8 32  I32Kind #u8 33  I16Kind #u8 34  I8Kind #u8 35
+  F64Kind #u8 48  F32Kind #u8 49  F16Kind #u8 50
+  
+  #c "Kind tests"
   tag? ( kind Tag = )
-  undef? ( #u = )  null? ( #n = )  bool? ( kind Bool = )
-  sym? ( kind Sym = )  str? ( kind Str = )  bin? ( kind Bin = )
-  vec? ( kind Vec = )  map? ( kind Map = )
+  undef? ( #u = )  null? ( #n = )  bool? ( kind BoolKind = )
+  sym? ( kind SymKind = )  str? ( kind StrKind = )  bin? ( kind BinKind = )
+  vec? ( kind VecKind = )  map? ( kind MapKind = )
   container? ( kind #u8 3 >> 3 #u8 1 = )
   num? ( kind #u8 3 >> 3 #u8 2 > )
   u? ( kind #u8 4 >> 4 #u8 1 = )
