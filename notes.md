@@ -11,6 +11,8 @@ Dabbling at a formulaic format forming formidable formalisms.
 - `send` / `recv`
 - js EVAL channel on -42
 - `spawn`
+- crypto primitives
+- network channels
 
 
 
