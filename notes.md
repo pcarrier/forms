@@ -2,7 +2,6 @@ Dabbling at a formulaic format forming formidable formalisms.
 
 ## TODO
 
-- `>stor`, `>stor`
 - `>cbor`, `cbor>`
 - `stor2cbor`, `cbor2stor`
 - `>json`, `json>`

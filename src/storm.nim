@@ -1,4 +1,4 @@
-import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, stor
+import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, stor, sss
 
 type
   Invalid* = object of CatchableError
@@ -9,8 +9,8 @@ type
     RECV = 16, SEND = 17, R18 = 18, R19 = 19, READ = 20, DISCARD_STREAM = 21, R22 = 22, R23 = 23,
     PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, HAS = 32,
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
-    DROP = 48, PICK = 49, R50, SWAP = 51, R52 = 52, R53 = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
-    ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68, MOD = 69, DIVMOD = 70, POW = 71, LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81
+    DROP = 48, PICK = 49, R50, SWAP = 51, TO_STOR = 52, FROM_STOR = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
+    ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68 = 68, MOD = 69, DIVMOD = 70, POW = 71, LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81
     TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94, TO_BIN = 95, TO_VEC = 96
   RefDeq* = Deque[Ref]
   ChannelKind = enum
@@ -777,6 +777,16 @@ proc eval(vm: ptr VM, c: uint8) =
     let b = vm.data.popLast
     vm.data.addLast(a)
     vm.data.addLast(b)
+  of TO_STOR:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let v = vm.data.popLast
+    vm.data.addLast(v.print.reform)
+  of FROM_STOR:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let v = vm.data.popLast
+    if v.kind != Str: raise newException(Invalid, &"kind mismatch: expected Str, found {v.kind}")
+    let (r, _) = v.str.parse.parse
+    for i in r: vm.data.addLast(i.refer)
   of ADD: vm.add
   of SUB: vm.sub
   of PROD: vm.prod
@@ -808,7 +818,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_VEC: vm.toVec
   of TO_BIN: vm.toBin
   of R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
-    R28, R29, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
+    R28, R29, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
     raise newException(Invalid, &"illegal primitive {c}")
 
