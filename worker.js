@@ -25,6 +25,7 @@
     };
     send(0, 0, stork);
     advance(0, -1);
+    displayVM(0);
   } catch (e) {
     postMessage(e);
   }

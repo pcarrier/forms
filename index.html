@@ -192,7 +192,7 @@ leave</a></pre>
                             dup #u8 25 swap << |
                             dup #u8 27 swap >> |
                             #u64 2685821657736338717 * )
-          #u64 0 xorshift64* dup xorshift64* dup xorshift64* )</a></pre>
+          #u64 0 #u8 0 [ dup #u8 10 &lt; ] [ over xorshift64* swap #u8 1 + ] while ) drop</a></pre>
         <h3>Aspirational</h3>
         <pre><a class="evaluable" href="#"
               >'/devenv fetch 'body get stor> eval</a></pre>
@@ -217,9 +217,10 @@ leave</a></pre>
         </p>
       </form>
       <p>
-        <button onclick="step()">step</button> or
-        <button onclick="run()">run</button>
-        <input id="steps" type="number" value="10000" step="10000"/> instructions(/frame)
+        <button onclick="step()">step</button>
+        <input id="steps" type="number" value="1" /> instructions or
+        <button onclick="run()">run</button> at
+        <input id="ipf" type="number" value="10000" step="1000" /> forms/frame
       </p>
     </div>
     <div id="target"></div>
@@ -231,7 +232,8 @@ leave</a></pre>
         l = document.getElementById("log"),
         g = document.getElementById("go"),
         runImmediately = document.getElementById("run"),
-        steps = document.getElementById("steps");
+        steps = document.getElementById("steps"),
+        ipf = document.getElementById("ipf");
 
       i.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && e.ctrlKey) {
@@ -264,7 +266,7 @@ leave</a></pre>
         } else {
           const raf = () => {
             if ($refresh) {
-              worker.postMessage([0, [-1, steps.value]]);
+              worker.postMessage([0, [-1, ipf.value]]);
               worker.postMessage([0, [-2]]);
             }
             requestAnimationFrame(raf);
@@ -282,16 +284,15 @@ leave</a></pre>
         l.appendChild(log);
         worker.postMessage([0, [Number(t.checked), i.value]]);
         if (runImmediately.checked) {
-          run();
+          $refresh = true;
+        } else {
+          $refresh = false;
         }
       });
 
       function step() {
         $worker.postMessage([0, [-1, steps.value]]);
-      }
-
-      function run() {
-        $refresh = true;
+        $worker.postMessage([0, [-2]]);
       }
     </script>
   </body>
