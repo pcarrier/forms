@@ -2,7 +2,7 @@
   code-tag #u64 6
   halt %0  noop %1  eval %2  kind %3  size %4
   untag %5  tag %6
-  enter %8  leave %9  clear-stream %10  clear-data %11
+  fault %7  enter %8  leave %9  clear-stream %10  clear-data %11
   #c [ 'TODO recv %16  send %17 ]
   read %20  discard-stream %21
   push %24  pop %25  set %30  get %31  has %32
@@ -44,7 +44,7 @@
 
   #c 'Scopes
   locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
-  def ( #u8 3 read #u8 2 read ( <contexts #u8 0 get rot rot set leave %8 #u8 2 discard-stream ) )
+  def ( #u8 3 read #u8 2 read ( <contexts #u8 0 get dup map? ! [ "top-most context must be a map" fault ] when rot rot set leave %8 #u8 2 discard-stream ) )
 
   #c "Control flow"
   if    ( [ ] swap push swap push swap >u8 get eval )

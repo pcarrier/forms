@@ -5,7 +5,7 @@ type
   Status* = enum
     RUNNING, FAULT, HALT
   PCode = enum
-    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, R7 = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11, R12 = 12, R13 = 13, R14 = 14, R15 = 15,
+    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, FAULT = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11, R12 = 12, R13 = 13, R14 = 14, R15 = 15,
     RECV = 16, SEND = 17, R18 = 18, R19 = 19, READ = 20, DISCARD_STREAM = 21, R22 = 22, R23 = 23,
     PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, HAS = 32,
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
@@ -621,14 +621,20 @@ proc eval(vm: ptr VM, c: uint8) =
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     let v = vm.data.popLast
     if v.kind != Tag:
-      raise newException(Invalid, &"kind mismatch: expected tag, found {v.kind}")
+      raise newException(Invalid, &"kind mismatch: expected Tag, found {v.kind}")
     vm.data.addLast(v.tagged)
   of TAG:
     if vm.data.len < 2: raise newException(Invalid, "deque underflow")
     let t = vm.data.popLast
-    if t.kind != U64: raise newException(Invalid, &"kind mismatch: expected u64, found {t.kind}")
+    if t.kind != U64: raise newException(Invalid, &"kind mismatch: expected U64, found {t.kind}")
     let v = vm.data.popLast
     vm.data.addLast(tag(v, t.u64).refer)
+  of FAULT:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let msg = vm.data.popLast
+    if msg.kind != Str: raise newException(Invalid, &"kind mismatch: expected Str, found {msg.kind}")
+    vm.status = FAULT
+    vm.fault = msg.str
   of ENTER:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     vm.contexts.addFirst(vm.data.popLast)
@@ -656,14 +662,14 @@ proc eval(vm: ptr VM, c: uint8) =
     if vm.data.len < 2: raise newException(Invalid, "deque underflow")
     let x = vm.data.popLast
     let xs = vm.data.popLast
-    if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected vector, found {xs.kind}")
+    if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
     var res = xs[]
     res.vec.add(x)
     vm.data.addLast(res.refer)
   of POP:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     let xs = vm.data.popLast
-    if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected vector, found {xs.kind}")
+    if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
     if xs.vec.len < 1: raise newException(Invalid, "vec underflow")
     vm.data.addLast(xs.vec[^1])
   of SET:
@@ -677,33 +683,33 @@ proc eval(vm: ptr VM, c: uint8) =
       res.map[k] = v
       vm.data.addLast(res.refer)
     of Vec:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
-      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Vec index {k}")
+      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} (len {c.vec.len})")
       var res = c[]
       res.vec[offset] = v
       vm.data.addLast(res.refer)
     else:
-      raise newException(Invalid, &"kind mismatch: expected map or vec, found {c.kind}")
+      raise newException(Invalid, &"kind mismatch: expected Map or Vec, found {c.kind}")
   of GET:
     if vm.data.len < 2: raise newException(Invalid, "deque underflow")
     let k = vm.data.popLast
     let c = vm.data.popLast
     case c.kind:
     of Map:
-      try: vm.data.addLast(c.map[k]) except: raise newException(Invalid, &"key not found {k} in {c}")
+      try: vm.data.addLast(c.map[k]) except: raise newException(Invalid, &"key not found {k}")
     of Vec:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
-      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Vec index {k}")
+      if offset < 0 or offset >= c.vec.len: raise newException(Invalid, &"index out of bounds {offset} (len {c.vec.len})")
       vm.data.addLast(c.vec[offset])
     of Str:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid str index {k}")
-      if offset < 0 or offset >= c.str.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Str index {k}")
+      if offset < 0 or offset >= c.str.len: raise newException(Invalid, &"index out of bounds {offset} (len {c.str.len})")
       vm.data.addLast(c.str[offset].reform)
     of Bin:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid bin index {k}")
-      if offset < 0 or offset >= c.bin.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Bin index {k}")
+      if offset < 0 or offset >= c.bin.len: raise newException(Invalid, &"index out of bounds {offset} (len {c.bin.len})")
       vm.data.addLast(c.bin[offset].reform)
-    else: raise newException(Invalid, &"kind mismatch: expected map or vec, found {c.kind}")
+    else: raise newException(Invalid, &"kind mismatch: expected Map or Vec, found {c.kind}")
   of HAS:
     if vm.data.len < 2: raise newException(Invalid, "deque underflow")
     let k = vm.data.popLast
@@ -712,15 +718,15 @@ proc eval(vm: ptr VM, c: uint8) =
     of Map:
       vm.data.addLast(c.map.hasKey(k).reform)
     of Vec:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Vec index {k}")
       vm.data.addLast((offset >= 0 and offset < c.vec.len).reform)
     of Str:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid str index {k}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Str index {k}")
       vm.data.addLast((offset >= 0 and offset < c.str.len).reform)
     of Bin:
-      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid bin index {k}")
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid Bin index {k}")
       vm.data.addLast((offset >= 0 and offset < c.bin.len).reform)
-    else: raise newException(Invalid, &"kind mismatch: expected map, vec, str, or bin, found {c.kind}")
+    else: raise newException(Invalid, &"kind mismatch: expected Map, Vec, Str, or Bin, found {c.kind}")
   of PUSH_DATA:
     vm.data.addLast(toSeq(vm.data.items).reform)
   of PUSH_STREAM:
@@ -770,7 +776,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_F64: vm.toF64
   of TO_STR: vm.toStr
   of TO_SYM: vm.toSym
-  of R7, R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
+  of R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
     R28, R29, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
     raise newException(Invalid, &"illegal primitive {c}")
