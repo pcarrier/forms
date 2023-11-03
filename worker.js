@@ -5,12 +5,15 @@
     const send = module.cwrap("recv", null, ["number", "number", "string"]),
       advance = module.cwrap("advance", null, ["number", "number"]),
       displayVM = module.cwrap("displayVM", null, ["number"]),
+      deFault = module.cwrap("deFault", null, ["number"]),
       stork = await (await fetch("stork.stor")).text();
     onmessage = (evt) => {
       const [slot, ...rest] = evt.data;
       rest.forEach((x) => {
         let [fmt, payload] = x;
         switch (fmt) {
+          case -3:
+            deFault(slot);
           case -2:
             displayVM(slot);
             break;

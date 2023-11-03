@@ -46,6 +46,7 @@ proc `$`*(vm: VM): string = &"{vm.data} ← {vm.stream} @ {vm.contexts}"
 proc lookup(vm: ptr VM, r: Ref): Ref
 proc eval(vm: ptr VM, r: Ref)
 proc advance*(vm: ptr VM)
+proc faulty*(vm: ptr VM, fault: string)
 
 proc lookup(vm: ptr VM, ctx: Ref, r: Ref): Ref =
   case ctx.kind:
@@ -634,7 +635,7 @@ proc eval(vm: ptr VM, c: uint8) =
     let msg = vm.data.popLast
     if msg.kind != Str: raise newException(Invalid, &"kind mismatch: expected Str, found {msg.kind}")
     vm.status = FAULT
-    vm.fault = msg.str
+    faulty(vm, msg.str)
   of ENTER:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     vm.contexts.addFirst(vm.data.popLast)
@@ -812,7 +813,7 @@ proc advance*(vm: ptr VM, steps: int) =
   var save: VM
   let stop_at = vm[].step + steps.BiggestUInt
   try:
-    while vm.step <= stop_at and vm.stream.len > 0:
+    while vm.step <= stop_at and vm.stream.len > 0 and vm.status != FAULT:
       save = vm[]
       vm.status = RUNNING
       let i = vm.stream.popFirst
@@ -824,7 +825,7 @@ proc advance*(vm: ptr VM, steps: int) =
 proc advance*(vm: ptr VM) =
   var save: VM
   try:
-    while vm.stream.len > 0:
+    while vm.stream.len > 0 and vm.status != FAULT:
       save = vm[]
       vm.status = RUNNING
       let i = vm.stream.popFirst

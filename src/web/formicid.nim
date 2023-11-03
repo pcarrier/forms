@@ -100,5 +100,12 @@ proc displayVM(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#"
       return
   display(vm)
 
+proc deFault(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
+  var vm =
+    try: VMs[slot].addr
+    except KeyError:
+      return
+  vm.status = RUNNING
+
 echo &"formic.id build {buildDescr}"
 jsEval("self.postMessage(undefined)")
