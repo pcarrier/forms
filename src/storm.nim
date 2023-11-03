@@ -11,7 +11,7 @@ type
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
     DROP = 48, PICK = 49, R50, SWAP = 51, R52 = 52, R53 = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
     ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68, MOD = 69, DIVMOD = 70, POW = 71, LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81
-    TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94
+    TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94, TO_BIN = 95, TO_VEC = 96
   RefDeq* = Deque[Ref]
   ChannelKind = enum
     Refs, Executable
@@ -578,7 +578,7 @@ proc toStr(vm: ptr VM) =
   of Bool: vm.data.addLast((if v.b: "#t" else: "#f").reform)
   of Undef: vm.data.addLast("#u".reform)
   of Null: vm.data.addLast("#n".reform)
-  of Str: vm.data.addLast(v.str.form.refer)
+  of Str: vm.data.addLast(v)
   of Bin: vm.data.addLast(v.bin.form.refer)
   of Sym: vm.data.addLast(v.sym.form.refer)
   else: raise newException(Invalid, &"unsupported kind {v.kind}")
@@ -605,6 +605,25 @@ proc toSym(vm: ptr VM) =
   of Str: vm.data.addLast(v.str.formSym.refer)
   of Bin: vm.data.addLast(v.bin.formSym.refer)
   of Sym: vm.data.addLast(v)
+  else: raise newException(Invalid, &"unsupported kind {v.kind}")
+
+proc toBin(vm: ptr VM) =
+  if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+  let v = vm.data.popLast
+  case v.kind:
+  of Str: vm.data.addLast(v.str.formBin.refer)
+  of Bin: vm.data.addLast(v)
+  of Sym: vm.data.addLast(v.sym.formBin.refer)
+  else: raise newException(Invalid, &"unsupported kind {v.kind}")
+
+proc toVec(vm: ptr VM) =
+  if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+  let v = vm.data.popLast
+  case v.kind:
+  of Map:
+    var res = newSeq[Ref]()
+    for (k, v) in v.map.pairs: res.add([k, v].toSeq().reform)
+    vm.data.addLast(res.form.refer)
   else: raise newException(Invalid, &"unsupported kind {v.kind}")
 
 proc eval(vm: ptr VM, c: uint8) =
@@ -672,6 +691,7 @@ proc eval(vm: ptr VM, c: uint8) =
     let xs = vm.data.popLast
     if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
     if xs.vec.len < 1: raise newException(Invalid, "vec underflow")
+    vm.data.addLast(xs.vec[0..^2].reform)
     vm.data.addLast(xs.vec[^1])
   of SET:
     if vm.data.len < 3: raise newException(Invalid, "deque underflow")
@@ -777,6 +797,8 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_F64: vm.toF64
   of TO_STR: vm.toStr
   of TO_SYM: vm.toSym
+  of TO_VEC: vm.toVec
+  of TO_BIN: vm.toBin
   of R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
     R28, R29, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
