@@ -5,7 +5,7 @@
   enter %8  leave %9  clear-stream %10  clear-data %11
   #c [ 'TODO recv %16  send %17 ]
   read %20  discard-stream %21
-  push %24  pop %25  set %30  get %31
+  push %24  pop %25  set %30  get %31  has %32
   <data %33  <stream %34  <contexts %35
   drop %48  pick %49  swap %51
   + %64  - %65  * %66
@@ -14,6 +14,24 @@
   & %77  | %78  ! %79  << %80  >> %81
   >u8 %82  >u16 %83  >u32 %84  >u64 %85  >i8 %86  >i16 %87  >i32 %88  >i64 %89  >f16 %90  >f32 %91  >f64 %92  >str %93  >sym %94
 
+  #c 'Kinds
+  Tag #u8 0
+  Undef #u8 1  Null #u8 2  Bool #u8 3
+  Sym #u8 8  Str #u8 9  Bin #u8 10
+  Vec #u8 11  Map #u8 12
+  U64 #u8 16  U32 #u8 17  U16 #u8 18  U8 #u8 19
+  I64 #u8 32  I32 #u8 33  I16 #u8 34  I8 #u8 35
+  F64 #u8 48  F32 #u8 49  F16 #u8 50
+  tag? ( kind Tag = )
+  undef? ( #u = )  null? ( #n = )  bool? ( kind Bool = )
+  sym? ( kind Sym = )  str? ( kind Str = )  bin? ( kind Bin = )
+  vec? ( kind Vec = )  map? ( kind Map = )
+  container? ( kind #u8 3 >> 3 #u8 1 = )
+  num? ( kind #u8 3 >> 3 #u8 2 > )
+  u? ( kind #u8 4 >> 4 #u8 1 = )
+  i? ( kind #u8 4 >> 4 #u8 2 = )
+  f? ( kind #u8 4 >> 4 #u8 3 = )
+
   #c "Code in and out"
   >immediate ( code-tag tag )
   immediate> ( kind 0 = [ untag swap drop ] [ halt ] if )
@@ -21,9 +39,10 @@
   #c "Stack manipulation"
   dup ( #u8 0 pick )
   over ( #u8 1 pick )
+  over2 ( #u8 2 pick )
   rot ( [ ] swap push swap push swap push dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
 
-  #c "Scopes"
+  #c 'Scopes
   locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
   def ( #u8 3 read #u8 2 read ( <contexts pop rot rot set leave %8 #u8 2 discard-stream ) )
 
@@ -35,4 +54,5 @@
              enter eval leave ) 
   while ( [ ~while~ ] + push [ when ] + dup >immediate
           { } swap [ ~while~ ] pop swap set
-          enter eval leave ) } %8
+          enter eval leave )
+  get-or ( over2 over2 has [ drop get ] [ swap drop swap drop ] if ) } %8

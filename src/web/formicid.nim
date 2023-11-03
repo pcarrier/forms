@@ -1,7 +1,7 @@
 import std/[deques, strformat, strutils, tables], ../[build, sss, form, stor, storm], js
 
 type
-  ElidedError* = object of CatchableError
+  InputError* = object of CatchableError
 
 var VMs = { 0: initVM() }.toTable()
 
@@ -47,23 +47,22 @@ proc html(rs: RefDeq): string =
     result.add(&"<tr><td>{r.html}</td></tr>")
   result.add(&"</table>")
 
-proc html(vm: VM): string =
+proc html(vm: ptr VM): string =
   result.add("<table>")
+  let status = case vm.status
+  of FAULT: &"<em>{vm.fault}</em>"
+  else: $vm.status
   result.add("<tr><th>Status</th><th>Contexts</th><th>Data</th><th>Stream</th></tr>")
-  result.add(&"<tr><td>{vm.status}<br/>step {vm.step}</td><td>{vm.contexts.html}</td><td>{vm.data.html}</td><td>{vm.stream.html}</td></tr>")
+  result.add(&"<tr><td>{status}<br/>step {vm.step}</td><td>{vm.contexts.html}</td><td>{vm.data.html}</td><td>{vm.stream.html}</td></tr>")
   result.add("</table>")
 
-proc reportError(msg: string, vm: VM) =
-  jsEval(&"self.postMessage('$target.innerHTML = \\'<em>{msg.jsString(2, true, false)}</em>{vm.html.jsString(2, false, false)}\\'')")
-
 proc display(vm: ptr VM) =
-  let state = vm[].html
+  let state = vm.html
   jsEval(&"self.postMessage('$target.innerHTML = {state.jsString(1, false, true)}')")
 
 {.emit: """
 #include <emscripten.h>
 """.}
-
 
 proc recv(slot: int, msgType: int, msg: cstring) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   var vm =
@@ -75,21 +74,15 @@ proc recv(slot: int, msgType: int, msg: cstring) {.exportc, codegenDecl: "EMSCRI
   of 0, 1:
     try:
       let (forms, elided) = ($msg).parse.parse
-      if elided: raise newException(ElidedError, "We do not transmit elided sources to virtual machines.")
+      if elided: raise newException(InputError, "We do not transmit elided sources to virtual machines.")
       case msgType:
       of 1: vm.tuck_in(forms)
       else: vm.stream_in(forms)
       display(vm)
-    except PrintError:
-      reportError(&"PrintError: {getCurrentExceptionMsg()}", vm[])
-    except ParseError:
-      reportError(&"ParseError: {getCurrentExceptionMsg()}", vm[])
-    except ElidedError:
-      reportError(&"ElidedError: {getCurrentExceptionMsg()}", vm[])
     except:
-      reportError(&"Unhandled exception: {getCurrentExceptionMsg()}", vm[])
+      faulty(vm, getCurrentExceptionMsg())
   else:
-    reportError(&"Unknown message type: {msgType}", vm[])
+    faulty(vm, "Unknown message type.")
 
 proc advance(slot: int, steps: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   var vm =
@@ -97,13 +90,8 @@ proc advance(slot: int, steps: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIV
     except KeyError:
       jsEval(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')")
       return
-  try:
-    if steps < 0: vm.advance()
-    else: vm.advance(steps)
-  except Invalid:
-    reportError(&"Invalid: {getCurrentExceptionMsg()}", vm[])
-  except:
-    reportError(&"Unhandled exception: {getCurrentExceptionMsg()}", vm[])
+  if steps < 0: vm.advance()
+  else: vm.advance(steps)
 
 proc displayVM(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   var vm =

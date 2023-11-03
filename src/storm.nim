@@ -7,22 +7,34 @@ type
   PCode = enum
     HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, R7 = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11, R12 = 12, R13 = 13, R14 = 14, R15 = 15,
     RECV = 16, SEND = 17, R18 = 18, R19 = 19, READ = 20, DISCARD_STREAM = 21, R22 = 22, R23 = 23,
-    PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, R32 = 32,
+    PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, HAS = 32,
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
     DROP = 48, PICK = 49, R50, SWAP = 51, R52 = 52, R53 = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
     ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68, MOD = 69, DIVMOD = 70, POW = 71, LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81
     TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94
   RefDeq* = Deque[Ref]
+  ChannelKind = enum
+    Refs, Executable
+  ExecutableChannel = object
+    read: proc (vm: ptr VM, ch: ptr Channel, r: Ref)
+    write: proc (vm: ptr VM, ch: ptr Channel, r: Ref)
+  Channel* = object
+    case kind*: ChannelKind:
+    of Refs: forms*: RefDeq
+    of Executable: executable*: ExecutableChannel
   VM* = object
     status*: Status
+    fault*: string
     step*: BiggestUInt
     data*: RefDeq
     contexts*: RefDeq
     stream*: RefDeq
+    channels*: TableRef[int, Channel]
 
 proc initVM*(): VM =
   result = VM(
     status: RUNNING,
+    fault: "",
     step: 0,
     data: initDeque[Ref](),
     contexts: initDeque[Ref](),
@@ -32,22 +44,32 @@ proc initVM*(): VM =
 proc `$`*(vm: VM): string = &"{vm.data} ← {vm.stream} @ {vm.contexts}"
 
 proc lookup(vm: ptr VM, r: Ref): ptr Ref
+proc eval(vm: ptr VM, r: Ref)
+proc advance*(vm: ptr VM)
 
 proc lookup(vm: ptr VM, ctx: Ref, r: Ref): ptr Ref =
   case ctx.kind:
   of Map:
     try: return ctx.map[r].addr except: return nil
-  # TODO: vecs?
-  else:
-    let c = vm.lookup(ctx)
-    if c != nil: result = vm.lookup(c[], r)
+  of Sym:
+    if ctx.tag == CODE_TAG and ctx.tagged.kind == Vec:
+      var nvm = initVM()
+      nvm.data.addFirst(r)
+      nvm.contexts = vm.contexts
+      nvm.stream = ctx.tagged.vec.toDeque()
+      nvm.addr.advance()
+      if nvm.status == HALT and nvm.data.len == 1:
+        return nvm.data[0].addr
+      else:
+        raise newException(Invalid, &"lookup failed: {nvm}")
+  else: discard
+  let c = vm.lookup(ctx)
+  if c != nil: result = vm.lookup(c[], r)
 
 proc lookup(vm: ptr VM, r: Ref): ptr Ref =
   for ctx in vm.contexts:
     result = vm.lookup(ctx, r)
     if not result.isNil: break
-
-proc eval(vm: ptr VM, r: Ref)
 
 proc add(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
@@ -260,8 +282,8 @@ proc notOp(vm: ptr VM) =
 
 proc shlOp(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
-  let x = vm.data.popLast
   let y = vm.data.popLast
+  let x = vm.data.popLast
   let n = try: y[].toInt except: raise newException(Invalid, &"invalid shift {y}")
   case x.kind:
   of U64: vm.data.addLast((x.u64 shl n).reform)
@@ -276,8 +298,8 @@ proc shlOp(vm: ptr VM) =
 
 proc shrOp(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow")
-  let x = vm.data.popLast
   let y = vm.data.popLast
+  let x = vm.data.popLast
   let n = try: y[].toInt except: raise newException(Invalid, &"invalid shift {y}")
   case x.kind:
   of U64: vm.data.addLast((x.u64 shr n).reform)
@@ -678,6 +700,23 @@ proc eval(vm: ptr VM, c: uint8) =
       if offset < 0 or offset >= c.bin.len: raise newException(Invalid, &"index out of bounds {offset} in {c}")
       vm.data.addLast(c.bin[offset].reform)
     else: raise newException(Invalid, &"kind mismatch: expected map or vec, found {c.kind}")
+  of HAS:
+    if vm.data.len < 2: raise newException(Invalid, "deque underflow")
+    let k = vm.data.popLast
+    let c = vm.data.popLast
+    case c.kind:
+    of Map:
+      vm.data.addLast(c.map.hasKey(k).reform)
+    of Vec:
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid vec index {k}")
+      vm.data.addLast((offset >= 0 and offset < c.vec.len).reform)
+    of Str:
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid str index {k}")
+      vm.data.addLast((offset >= 0 and offset < c.str.len).reform)
+    of Bin:
+      let offset = try: k[].toInt except: raise newException(Invalid, &"invalid bin index {k}")
+      vm.data.addLast((offset >= 0 and offset < c.bin.len).reform)
+    else: raise newException(Invalid, &"kind mismatch: expected map, vec, str, or bin, found {c.kind}")
   of PUSH_DATA:
     vm.data.addLast(toSeq(vm.data.items).reform)
   of PUSH_STREAM:
@@ -728,7 +767,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_STR: vm.toStr
   of TO_SYM: vm.toSym
   of R7, R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
-    R28, R29, R32, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
+    R28, R29, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R52, R53, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
     raise newException(Invalid, &"illegal primitive {c}")
 
@@ -755,32 +794,34 @@ proc eval(vm: ptr VM, r: Ref) =
   else:
     vm.data.addLast(r)
 
+proc faulty*(vm: ptr VM, fault: string) =
+  vm.status = FAULT
+  vm.fault = fault
+
 proc advance*(vm: ptr VM, steps: int) =
   var save: VM
-  vm.status = RUNNING
   let stop_at = vm[].step + steps.BiggestUInt
   try:
-    while vm.step <= stop_at and vm.stream.len > 0 and vm.status == RUNNING:
+    while vm.step <= stop_at and vm.stream.len > 0:
       save = vm[]
+      vm.status = RUNNING
       let i = vm.stream.popFirst
       vm.eval(i)
   except:
     vm[] = save
-    vm.status = FAULT
-    raise getCurrentException()
+    faulty(vm, getCurrentExceptionMsg())
 
 proc advance*(vm: ptr VM) =
   var save: VM
-  vm.status = RUNNING
   try:
-    while vm.stream.len > 0 and vm.status == RUNNING:
+    while vm.stream.len > 0:
       save = vm[]
+      vm.status = RUNNING
       let i = vm.stream.popFirst
       vm.eval(i)
   except:
     vm[] = save
-    vm.status = FAULT
-    raise getCurrentException()
+    faulty(vm, getCurrentExceptionMsg())
 
 proc stream_in*(vm: ptr VM, msgs: openArray[Form]) =
   for msg in msgs: vm.stream.addLast(msg.refer)

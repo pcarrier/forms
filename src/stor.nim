@@ -86,15 +86,15 @@ func parse(src: openArray[Token]; i: var int, elided: var bool): Form =
             raise newException(ParseError, "expected symbol after #f32")
           var f: float
           if parseFloat(next.sym, f) != len(next.sym):
-            raise newException(ParseError, "expected float after #f64")
+            raise newException(ParseError, "expected float after #f32")
           return formF32(f)
         of "#f16":
           let next = parse(src, i, elided)
           if next.kind != Sym:
-            raise newException(ParseError, "expected symbol after #f32")
+            raise newException(ParseError, "expected symbol after #f16")
           var f: float
           if parseFloat(next.sym, f) != len(next.sym):
-            raise newException(ParseError, "expected float after #f64")
+            raise newException(ParseError, "expected float after #f16")
           return formF16(f)
         of "#i64":
           let next = parse(src, i, elided)
@@ -142,7 +142,7 @@ func parse(src: openArray[Token]; i: var int, elided: var bool): Form =
             raise newException(ParseError, "expected symbol after #u32")
           var u: uint
           if parseUint(next.sym, u) != len(next.sym):
-            raise newException(ParseError, "expected uint after #u64")
+            raise newException(ParseError, "expected uint after #u32")
           return form(uint32(u))
         of "#u16":
           let next = parse(src, i, elided)
@@ -150,7 +150,7 @@ func parse(src: openArray[Token]; i: var int, elided: var bool): Form =
             raise newException(ParseError, "expected symbol after #u16")
           var u: uint
           if parseUint(next.sym, u) != len(next.sym):
-            raise newException(ParseError, "expected uint after #u64")
+            raise newException(ParseError, "expected uint after #u16")
           return form(uint16(u))
         of "#u8":
           let next = parse(src, i, elided)
@@ -158,7 +158,7 @@ func parse(src: openArray[Token]; i: var int, elided: var bool): Form =
             raise newException(ParseError, "expected symbol after #u8")
           var u: uint
           if parseUint(next.sym, u) != len(next.sym):
-            raise newException(ParseError, "expected uint after #u64")
+            raise newException(ParseError, "expected uint after #u8")
           return form(uint8(u))
         else:
           var v: uint64
