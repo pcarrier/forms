@@ -43,14 +43,14 @@ proc initVM*(): VM =
 
 proc `$`*(vm: VM): string = &"{vm.data} ← {vm.stream} @ {vm.contexts}"
 
-proc lookup(vm: ptr VM, r: Ref): ptr Ref
+proc lookup(vm: ptr VM, r: Ref): Ref
 proc eval(vm: ptr VM, r: Ref)
 proc advance*(vm: ptr VM)
 
-proc lookup(vm: ptr VM, ctx: Ref, r: Ref): ptr Ref =
+proc lookup(vm: ptr VM, ctx: Ref, r: Ref): Ref =
   case ctx.kind:
   of Map:
-    try: return ctx.map[r].addr except: return nil
+    try: return ctx.map[r] except: return nil
   of Tag:
     if ctx.tag == CODE_TAG and ctx.tagged.kind == Vec:
       var nvm = initVM()
@@ -62,15 +62,15 @@ proc lookup(vm: ptr VM, ctx: Ref, r: Ref): ptr Ref =
       nvm.stream = ctx.tagged.vec.toDeque()
       nvm.addr.advance()
       if nvm.status == HALT and nvm.data.len > 0:
-        return nvm.data[^1].addr
+        return nvm.data[^1]
       else:
         return nil
   else: discard
   let c = vm.lookup(ctx)
-  if c != nil: return vm.lookup(c[], r)
+  if c != nil: return vm.lookup(c, r)
   return nil
 
-proc lookup(vm: ptr VM, r: Ref): ptr Ref =
+proc lookup(vm: ptr VM, r: Ref): Ref =
   for ctx in vm.contexts:
     result = vm.lookup(ctx, r)
     if not result.isNil: break
@@ -788,7 +788,7 @@ proc eval(vm: ptr VM, r: Ref) =
     let res = vm.lookup(r)
     if res.isNil: raise newException(Invalid, &"undefined symbol {r}")
     else:
-      vm.stream.addFirst(res[])
+      vm.stream.addFirst(res)
   of Tag:
     if r.tag == CODE_TAG:
       case r.tagged.kind
