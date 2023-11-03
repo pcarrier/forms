@@ -192,9 +192,9 @@ leave</a></pre>
 #u64 20 u64-fib</a></pre>
         <pre><a class="evaluable" href="#"
           >locally ( def xorshift64* ( dup #u64 0 = [ drop #u64 1 ] when
-                            dup #u8 12 swap >> |
-                            dup #u8 25 swap << |
-                            dup #u8 27 swap >> |
+                            dup #u8 12 >> |
+                            dup #u8 25 << |
+                            dup #u8 27 >> |
                             #u64 2685821657736338717 * )
           #u64 0 #u8 0 [ dup #u8 10 &lt; ] [ over xorshift64* swap #u8 1 + ] while ) drop</a></pre>
         <h3>Aspirational</h3>
