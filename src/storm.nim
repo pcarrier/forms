@@ -54,6 +54,7 @@ proc lookup(vm: ptr VM, ctx: Ref, r: Ref): ptr Ref =
   of Tag:
     if ctx.tag == CODE_TAG and ctx.tagged.kind == Vec:
       var nvm = initVM()
+      defer: vm.step += nvm.step
       nvm.data.addFirst(r)
       for octx in vm.contexts:
         if octx != ctx:
