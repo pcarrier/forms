@@ -1,7 +1,6 @@
 /fonts/
-/nimcache/
+/src/web/nimcache/
 /testresults/
-
-/web/
 /tests/sss/tsss
 /tests/stor/tstor
+/web/
