@@ -55,9 +55,9 @@
   if    ( [ ] swap push swap push swap >u8 get eval )
   when  ( [ ] if )
   do-while ( [ [ ~do-while~ ] when ] + dup >immediate
-             { } swap [ ~do-while~ ] pop swap set
+             { } swap '~do-while~ >sym swap set
              enter eval leave ) 
   while ( [ ~while~ ] + push [ when ] + dup >immediate
-          { } swap [ ~while~ ] pop swap set
+          { } swap '~while~ >sym swap set
           enter eval leave )
   get-or ( over2 over2 has [ drop get ] [ swap drop swap drop ] if ) } %8
