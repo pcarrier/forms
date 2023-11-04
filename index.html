@@ -188,12 +188,20 @@
         <pre><a class="evaluable" href="#"
               >[ #u8 7 #f64 3.14159265358979323846264338327950288419716939937510582097494459 swap &gt;f64 * >u8 ] eval</a></pre>
         <pre><a class="evaluable" href="#"
-          >{ u64-factorial ( #u64 1 [ over #u64 1 &gt; ] [ over * swap #u64 1 - swap ] while swap drop ) }
+          >{ u64-factorial ( #u64 1
+                 [ over #u64 1 &gt; ]
+                 [ over * swap #u64 1 - swap ] while
+                 swap drop ) }
 enter
   #u64 20 u64-factorial
 leave</a></pre>
         <pre><a class="evaluable" href="#"
-          >def u64-fib ( dup #u64 1 &gt; [ dup dup #u64 1 - u64-fib swap #u64 2 - u64-fib + swap drop ] when )
+          >def u64-fib ( dup #u64 1 &gt;
+              [ dup dup
+                #u64 1 - u64-fib
+                swap
+                #u64 2 - u64-fib
+                + swap drop ] when )
 #u64 20 u64-fib</a></pre>
         <pre><a class="evaluable" href="#"
           >locally ( def xorshift64* ( dup #u64 0 = [ drop #u64 1 ] when
