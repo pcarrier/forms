@@ -116,10 +116,6 @@ func parse*(src: string): seq[Token] =
       let c2 = src[i]
       var value = ""
       case c2:
-        of '\'':
-          inc i
-          parseUntilSpace(src, i, value)
-          add(result, Token(kind: Symbol, quoting: Single, value: value))
         of '"':
           inc i
           parseDoubleQuotes(src, i, value)
