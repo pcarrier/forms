@@ -1,10 +1,10 @@
-import Worker from "./worker.js?worker";
+import Worker from "./worker.ts?worker";
 import "./style.css";
 
 declare global {
   interface Window {
     $worker: Worker;
-    $target: HTMLElement;
+    $ui: (src: string) => void;
     $refresh: boolean;
   }
 }
@@ -17,7 +17,8 @@ const root = document.getElementById("root")!,
   go = document.getElementById("go")!,
   runImmediately = document.getElementById("run")! as HTMLInputElement,
   steps = document.getElementById("steps")! as HTMLInputElement,
-  ipf = document.getElementById("ipf")! as HTMLInputElement;
+  ipf = document.getElementById("ipf")! as HTMLInputElement,
+  target = document.getElementById("target")!;
 
 instructions.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && e.ctrlKey) {
@@ -40,10 +41,14 @@ Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
 });
 
 const worker = new Worker();
+
+window.$ui = function ui(src: string) {
+  target.innerHTML = src;
+};
+
 window.$worker = worker;
-window.$target = document.getElementById("target")!;
 window.$refresh = false;
-// First message indicates the worker has started.
+
 worker.onmessage = (evt) => {
   if (evt.data) {
     console.log(`Failed loading: ${evt.data}`);
@@ -55,7 +60,7 @@ worker.onmessage = (evt) => {
       requestAnimationFrame(raf);
     };
     requestAnimationFrame(raf);
-    worker.onmessage = (evt) => eval(evt.data);
+    worker.onmessage = (e) => { eval(e.data) };
     root.style.display = "block";
   }
 };

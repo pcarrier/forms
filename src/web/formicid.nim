@@ -58,7 +58,7 @@ proc html(vm: ptr VM): string =
 
 proc display(vm: ptr VM) =
   let state = vm.html
-  jsEval(&"self.postMessage('$target.innerHTML = {state.jsString(1, false, true)}')")
+  jsEval(&"self.postMessage('window.$ui({state.jsString(1, false, true)})')")
 
 {.emit: """
 #include <emscripten.h>

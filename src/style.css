@@ -42,9 +42,9 @@ a:visited {
 }
 
 html {
+  margin: 0 auto 0 auto;
   max-width: 80em;
   font-size: 10pt;
-  margin: 0 auto 0 auto;
   padding: 2em;
   color: #ccc;
   background-color: #222;
@@ -80,6 +80,7 @@ pre {
 
 pre {
   background-color: #111;
+  white-space: pre-wrap;
 }
 
 footer {
