@@ -75,8 +75,6 @@ proc lookup(vm: ptr VM, ctx: Ref, r: Ref): Ref =
       else:
         return nil
   else: discard
-  let c = vm.lookup(ctx)
-  if c != nil: return vm.lookup(c, r)
   return nil
 
 proc lookup(vm: ptr VM, r: Ref): Ref =
