@@ -1,4 +1,4 @@
-import std/[sequtils, tables, unittest], form, sss, stor
+import std/[deques, sequtils, tables, unittest], form, sss, stor
 
 func newRef(value: Form): Ref =
   result = new(Ref)
@@ -15,10 +15,10 @@ suite "stor parser":
     let (parsed, _) = parse(stream)
     let expected = @[
       Form(kind: Map, map: toOrderedTable[Ref, Ref]({
-        newRef(Form(kind: Vec, vec: @[
+        newRef(Form(kind: Vec, vec: toDeque([
           newRef(Form(kind: Sym, sym: "foo")),
           newRef(Form(kind: F16, f16: Inf)),
-        ])): newRef(Form(kind: Bin, bin: "hello")),
+        ]))): newRef(Form(kind: Bin, bin: "hello")),
       })),
       Form(kind: U8, u8: 0),
       Form(kind: Sym, sym: "send"),
@@ -32,7 +32,7 @@ suite "stor printer":
     check(print(forms) == expected)
 
 suite "sss roundtrips":
-  let chunks = @["😅", " ", "'", "\"", "\\", "\\00", "\\u0000", "\x00", "\u0000", " { ", " } ", "%", "[", "]", "#c"];
+  let chunks = @["😅", " ", "'", "\"", "\\", "\\00", "\\u0000", "\x00", "\u0000", " { ", " } ", "%", "[", "]", "#c"]
 
   test "parses and prints and parses and prints the same":
     for i in len(chunks)..10_000:

@@ -4,7 +4,7 @@ Dabbling at a formulaic format forming formidable formalisms.
 
 - `>cbor`, `cbor>`
 - `stor2cbor`, `cbor2stor`
-- `>json`, `json>`
+- `>json`?
 - `json2stor`, `stor2json`
 - bf interpreter
 - `send` / `recv`, channels

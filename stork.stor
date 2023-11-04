@@ -7,7 +7,7 @@
   lpush %22  lpop %23  rpush %24  rpop %25  set %30  get %31  has %32
   <data %33  <stream %34  <contexts %35
   drop %48  pick %49  swap %51
-  >stor %52  stor> %53
+  >stor %52  stor> %53  json> %57
   + %64  - %65  * %66
   #c [ 'TODO / %67  % %69  /% %70  ^ %71 ]
   < %72  > %73  = %74  <= %75  >= %76
