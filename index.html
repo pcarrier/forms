@@ -217,7 +217,7 @@ leave</a></pre>
           ></textarea
           ><br />
           <input type="checkbox" id="tuck" checked /><label for="tuck"
-            >tuck in front of the stream</label
+            >tuck front of stream</label
           >
           <input type="checkbox" id="run" checked /><label for="run"
             >run immediately</label
@@ -226,16 +226,22 @@ leave</a></pre>
         </p>
       </form>
       <p>
-        <button onclick="step()">step</button>
-        <input id="steps" type="number" value="1" /> instructions or
+        <button onclick="step()">step</button> through
+        <input id="steps" type="number" value="1" /> instructions
+      </p>
+      <p>
         <button onclick="$refresh = true">run</button> at
         <input id="ipf" type="number" value="10000" step="1000" />
         forms/frame
       </p>
       <p>
         <button onclick="$worker.postMessage([0, [-3]]);">de-fault</button>
-        <button onclick="$worker.postMessage([0, [1, 'clear-data']]);">clear-data</button>
-        <button onclick="$worker.postMessage([0, [1, 'clear-stream']]);">clear-stream</button>
+        <button onclick="$worker.postMessage([0, [1, 'clear-data']]);">
+          clear-data
+        </button>
+        <button onclick="$worker.postMessage([0, [1, 'clear-stream']]);">
+          clear-stream
+        </button>
       </p>
     </div>
     <div id="target"></div>

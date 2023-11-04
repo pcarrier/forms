@@ -65,7 +65,11 @@ func `==`*(lhs: Form, rhs: Form): bool =
   of Sym: lhs.sym == rhs.sym
   of Str: lhs.str == rhs.str
   of Bin: lhs.bin == rhs.bin
-  of Vec: lhs.vec == rhs.vec
+  of Vec:
+    if lhs.vec.len != rhs.vec.len: return false
+    for i in 0 ..< lhs.vec.len:
+      if lhs.vec[i] != rhs.vec[i]: return false
+    return true
   of Map: lhs.map == rhs.map
   of U64: lhs.u64 == rhs.u64
   of U32: lhs.u32 == rhs.u32

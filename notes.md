@@ -7,13 +7,11 @@ Dabbling at a formulaic format forming formidable formalisms.
 - `>json`, `json>`
 - `json2stor`, `stor2json`
 - bf interpreter
-- `send` / `recv`
+- `send` / `recv`, channels
 - js EVAL channel on -42
 - `spawn`
 - crypto primitives
 - network channels
-
-
 
 ## FORM Open Representation Model (FORM)
 

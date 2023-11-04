@@ -6,6 +6,7 @@ srcDir        = "src"
 bin           = @["web/formicid"]
 
 requires "nim >= 2.0.0"
+requires "jsony >= 1.1.5"
 # requires "hashlib >= 1.0.1"
 
 task test, "Run test suite":
