@@ -3,5 +3,5 @@
 /testresults/
 /tests/sss/tsss
 /tests/stor/tstor
-/web/
+/wasm/
 nimcache/

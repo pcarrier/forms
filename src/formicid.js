@@ -1,1 +1,1 @@
-../web/formicid
+../wasm/formicid
