@@ -907,7 +907,7 @@ proc advance*(vm: ptr VM, steps: int) =
   var save: VM
   let stop_at = vm[].step + steps.BiggestUInt
   try:
-    while vm.step <= stop_at and vm.stream.len > 0 and vm.status != FAULT:
+    while vm.step < stop_at and vm.stream.len > 0 and vm.status != FAULT:
       save = vm[]
       vm.status = RUNNING
       let i = vm.stream.popFirst
