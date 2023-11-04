@@ -11,5 +11,5 @@ jobs:
       with:
         version: binary:stable
     - run: |
-        nimble test
-        nimble build
+        nimble test --accept
+        nimble build --accept
