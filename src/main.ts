@@ -41,9 +41,12 @@ Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
 });
 
 const worker = new Worker();
+let rendered = '';
 
 window.$ui = function ui(src: string) {
-  target.innerHTML = src;
+  if (rendered != src) {
+    target.innerHTML = rendered = src;
+  }
 };
 
 window.$worker = worker;

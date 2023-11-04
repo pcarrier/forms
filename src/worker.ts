@@ -1,4 +1,5 @@
 import Module from "./formicid.js";
+import stork from './stork.stor?raw';
 
 (async () => {
   const module = await Module();
@@ -6,8 +7,7 @@ import Module from "./formicid.js";
   const send = module.cwrap("recv", null, ["number", "number", "string"]),
     advance = module.cwrap("advance", null, ["number", "number"]),
     displayVM = module.cwrap("displayVM", null, ["number"]),
-    deFault = module.cwrap("deFault", null, ["number"]),
-    stork = await (await fetch("/stork.stor")).text();
+    deFault = module.cwrap("deFault", null, ["number"]);
 
   try {
     onmessage = (evt) => {
