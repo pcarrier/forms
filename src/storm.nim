@@ -32,7 +32,7 @@ type
     of Executable: executable*: ExecutableChannel
   VM* = object
     status*: Status
-    fault*: string
+    fault*: ref string
     step*: BiggestUInt
     data*: RefDeq
     contexts*: RefDeq
@@ -42,7 +42,7 @@ type
 proc initVM*(): VM =
   result = VM(
     status: RUNNING,
-    fault: "",
+    fault: nil,
     step: 0,
     data: initDeque[Ref](),
     contexts: initDeque[Ref](),
@@ -903,7 +903,7 @@ proc eval(vm: ptr VM, r: Ref) =
 
 proc faulty*(vm: ptr VM, fault: string) =
   vm.status = FAULT
-  vm.fault = fault
+  vm.fault[] = fault
 
 proc advance*(vm: ptr VM, steps: int) =
   var save: VM

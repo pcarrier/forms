@@ -1,64 +1,20 @@
-import std/[deques, strformat, strutils, tables], ../[build, sss, form, stor, storm], js
+import std/[strformat, tables], ../[build, form, sap, sss, stor, storm], js
 
 type
   InputError* = object of CatchableError
 
 var VMs = { 0: initVM() }.toTable()
 
-proc html(r: Ref): string =
-  case r.kind:
-  of U64, U32, U16, U8, I64, I32, I16, I8, F64, F32, F16, Bool, Undef, Null:
-    result.add($r)
-  of Sym, Str, Bin:
-    result.add(($r).multiReplace(@[("&", "&amp;"), ("<", "&lt;"), (">", "&gt;"), ("\"", "&quot;")]))
-  of Tag:
-    if r.tag == CODE_TAG:
-      case r.tagged.kind:
-      of U8:
-        result.add(&"%{r.tagged.u8}")
-      of Vec:
-        if r.tagged.vec.len == 0:
-          result.add(&"( )")
-        else:
-          result.add(&"( ){r.tagged.html}")
-      else: result.add(&"<span class='tag'>#{r.tag}</span> {r.tagged.html}")
-    else:
-      result.add(&"<span class='tag'>#{r.tag}</span> {r.tagged.html}")
-  of Vec:
-    if r.vec.len == 0:
-      result.add($r)
-    else:
-      result.add("<table>")
-      for f in r.vec:
-        result.add(&"<lr><td>{f.html}</td></tr>")
-      result.add("</table>")
-  of Map:
-    if r.map.len == 0:
-      result.add($r)
-    else:
-      result.add("<table>")
-      for k, v in r.map.pairs:
-        result.add(&"<tr><td>{k.html}</td><td>{v.html}</td></tr>")
-      result.add("</table>")
+proc sap(vm: ptr VM): string =
+  var fault = if vm.fault.isNil: vm.fault[].reform else: formNull().refer
 
-proc html(rs: RefDeq): string =
-  result.add(&"<table>")
-  for r in rs.items:
-    result.add(&"<tr><td>{r.html}</td></tr>")
-  result.add(&"</table>")
-
-proc html(vm: ptr VM): string =
-  let status = case vm.status
-  of FAULT: &"<span class=\"fault\">{vm.fault}</div>"
-  else: $vm.status
-  result.add(&"<p>{status} (step {vm.step})</p><table>")
-  result.add("<tr><th>Contexts</th><th>Data</th><th>Stream</th></tr>")
-  result.add(&"<tr><td>{vm.contexts.html}</td><td>{vm.data.html}</td><td>{vm.stream.html}</td></tr>")
-  result.add("</table>")
-
-proc display(vm: ptr VM) =
-  let state = vm.html
-  jsEval(&"self.postMessage('window.$ui({state.jsString(1, false, true)})')")
+  return [
+    ($vm.status).reform,
+    fault.reform,
+    vm.contexts.reform,
+    vm.data.reform,
+    vm.stream.reform,
+  ].reform.sap
 
 {.emit: """
 #include <emscripten.h>
@@ -68,7 +24,7 @@ proc recv(slot: int, msgType: int, msg: cstring) {.exportc, codegenDecl: "EMSCRI
   var vm =
     try: VMs[slot].addr
     except KeyError:
-      jsEval(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')")
+      jsEval(&"console.log('No such VM', {slot})")
       return
   case msgType:
   of 0, 1:
@@ -78,7 +34,6 @@ proc recv(slot: int, msgType: int, msg: cstring) {.exportc, codegenDecl: "EMSCRI
       case msgType:
       of 1: vm.tuck_in(forms)
       else: vm.stream_in(forms)
-      display(vm)
     except:
       faulty(vm, getCurrentExceptionMsg())
   else:
@@ -88,7 +43,7 @@ proc advance(slot: int, steps: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIV
   var vm =
     try: VMs[slot].addr
     except KeyError:
-      jsEval(&"self.postMessage('$target.innerHTML = \\'<em>No such VM</em>\\'')")
+      jsEval(&"console.log('No such VM', {slot})")
       return
   if steps < 0: vm.advance()
   else: vm.advance(steps)
@@ -98,7 +53,7 @@ proc displayVM(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#"
     try: VMs[slot].addr
     except KeyError:
       return
-  display(vm)
+  jsEval(&"self.postMessage('window.$ui({vm.sap.jsString(1, false, false)})')")
 
 proc deFault(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   var vm =
