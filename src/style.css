@@ -62,7 +62,6 @@ textarea {
   font-size: 100%;
 }
 
-textarea#instructions,
 pre {
   text-align: left;
   width: 100%;
@@ -80,6 +79,7 @@ pre {
 pre {
   background-color: #111;
   white-space: pre-wrap;
+  display: inline-block;
 }
 
 footer {
@@ -90,6 +90,7 @@ footer {
 table {
   width: 100%;
   table-layout: fixed;
+  border: none;
 }
 
 th,
@@ -112,13 +113,66 @@ li {
 
 th, td {
   padding: 1px;
-}
-
-th, td {
   border: 1px solid #444;
 }
 
-#log {
-  max-height: 10em;
-  overflow-y: scroll;
+.primitive {
+  color: #88f;
+}
+
+.immediate {
+  border: 1px dotted #88f;
+}
+
+.num::before {
+  color: #666;
+}
+.u64::before {
+  content: '#u64 ';
+}
+.u32::before {
+  content: '#u32 ';
+}
+.u16::before {
+  content: '#u16 ';
+}
+.u8::before {
+  content: '#u8 ';
+}
+.i64::before {
+  content: '#i64 ';
+}
+.i32::before {
+  content: '#i32 ';
+}
+.i16::before {
+  content: '#i16 ';
+}
+.i8::before {
+  content: '#i8 ';
+}
+.f64::before {
+  content: '#f64 ';
+}
+.f32::before {
+  content: '#f32 ';
+}
+.f16::before {
+  content: '#f16 ';
+}
+
+.bool-true {
+  color: #0f0;
+}
+
+.bool-false {
+  color: #f00;
+}
+
+.str {
+  border: 1px dotted #fff;
+}
+
+.bin {
+  border: 1px dotted #f0f;
 }

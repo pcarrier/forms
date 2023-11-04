@@ -1,4 +1,4 @@
-import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, json, stor, sss
+import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, json, sap, stor, sss
 
 type
   Invalid* = object of CatchableError
@@ -13,8 +13,8 @@ type
     R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, HAS = 32,
     PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35,
     R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
-    DROP = 48, PICK = 49, R50, SWAP = 51, TO_STOR = 52, FROM_STOR = 53, R54 = 54, R55 = 55, R56 = 56, FROM_JSON = 57,
-    R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
+    DROP = 48, PICK = 49, R50, SWAP = 51, TO_STOR = 52, FROM_STOR = 53, R54 = 54, R55 = 55, R56 = 56, FROM_JSON = 57, TO_SAP = 58,
+    R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
     ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68 = 68, MOD = 69, DIVMOD = 70, POW = 71,
     LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81,
     TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85,
@@ -835,6 +835,10 @@ proc eval(vm: ptr VM, c: uint8) =
     let v = vm.data.popLast
     if v.kind != Str: raise newException(Invalid, &"kind mismatch: expected Str, found {v.kind}")
     vm.data.addLast(v.str.jsonForm.refer)
+  of TO_SAP:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let v = vm.data.popLast
+    vm.data.addLast(v.sap.reform)
   of ADD: vm.add
   of SUB: vm.sub
   of PROD: vm.prod
@@ -870,7 +874,7 @@ proc eval(vm: ptr VM, c: uint8) =
     R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47,
     R50,
     R54, R55, R56,
-    R58, R59, R60, R61, R62, R63,
+    R59, R60, R61, R62, R63,
     R68:
     raise newException(Invalid, &"illegal primitive {c}")
 
@@ -910,6 +914,7 @@ proc advance*(vm: ptr VM, steps: int) =
       vm.status = RUNNING
       let i = vm.stream.popFirst
       vm.eval(i)
+    if vm.stream.len == 0 and vm.status != FAULT: vm.status = HALT
   except:
     vm[] = save
     faulty(vm, getCurrentExceptionMsg())
@@ -922,6 +927,7 @@ proc advance*(vm: ptr VM) =
       vm.status = RUNNING
       let i = vm.stream.popFirst
       vm.eval(i)
+    if vm.status != FAULT: vm.status = HALT
   except:
     vm[] = save
     faulty(vm, getCurrentExceptionMsg())

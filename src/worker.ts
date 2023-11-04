@@ -1,5 +1,5 @@
 import Module from "./formicid.js";
-import stork from './stork.stor?raw';
+import stork from "./stork.stor?raw";
 
 (async () => {
   const module = await Module();
@@ -32,11 +32,10 @@ import stork from './stork.stor?raw';
       });
     };
 
-    postMessage(undefined);
     send(0, 0, stork);
     advance(0, -1);
     displayVM(0);
   } catch (e) {
-    postMessage(e);
+    console.log(e);
   }
 })();
