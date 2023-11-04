@@ -105,18 +105,20 @@ li {
   text-align: left;
 }
 
-dl {
-  margin: 0;
-}
-
-dd,
-ol,
-ul {
-  margin: 0 0 0 1em;
-  padding: 0;
-}
-
 .fault {
   background-color: #f00;
   color: #fff;
+}
+
+th, td {
+  padding: 1px;
+}
+
+th, td {
+  border: 1px solid #444;
+}
+
+#log {
+  max-height: 10em;
+  overflow-y: auto;
 }

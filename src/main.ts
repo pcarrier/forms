@@ -9,32 +9,32 @@ declare global {
   }
 }
 
-const r = document.getElementById("root")!,
-  s = document.getElementById("stream")!,
-  i = document.getElementById("instructions")! as HTMLInputElement,
-  t = document.getElementById("tuck")! as HTMLInputElement,
-  l = document.getElementById("log")!,
-  g = document.getElementById("go")!,
+const root = document.getElementById("root")!,
+  stream = document.getElementById("stream")!,
+  instructions = document.getElementById("instructions")! as HTMLInputElement,
+  tuck = document.getElementById("tuck")! as HTMLInputElement,
+  logs = document.getElementById("log")!,
+  go = document.getElementById("go")!,
   runImmediately = document.getElementById("run")! as HTMLInputElement,
   steps = document.getElementById("steps")! as HTMLInputElement,
   ipf = document.getElementById("ipf")! as HTMLInputElement;
 
-i.addEventListener("keydown", (e) => {
+instructions.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && e.ctrlKey) {
     e.preventDefault();
-    g.click();
+    go.click();
   }
 });
 
 function iResetSize() {
-  i.style.height = "0";
-  i.style.height = `${i.scrollHeight}px`;
+  instructions.style.height = "0";
+  instructions.style.height = `${instructions.scrollHeight}px`;
 }
-i.addEventListener("input", iResetSize);
+instructions.addEventListener("input", iResetSize);
 Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
   (c as HTMLLinkElement).onclick = (e) => {
     e.preventDefault();
-    i.value = c.textContent || "";
+    instructions.value = c.textContent || "";
     iResetSize();
   };
 });
@@ -56,16 +56,17 @@ worker.onmessage = (evt) => {
     };
     requestAnimationFrame(raf);
     worker.onmessage = (evt) => eval(evt.data);
-    r.style.display = "block";
+    root.style.display = "block";
   }
 };
 
-s.addEventListener("submit", (e) => {
+stream.addEventListener("submit", (e) => {
   e.preventDefault();
   let log = document.createElement("pre");
-  log.textContent = i.value;
-  l.appendChild(log);
-  worker.postMessage([0, [Number(t.checked), i.value]]);
+  log.textContent = instructions.value;
+  logs.appendChild(log);
+  logs.scrollTop = logs.scrollHeight;
+  worker.postMessage([0, [Number(tuck.checked), instructions.value]]);
   if (runImmediately.checked) {
     window.$refresh = true;
   } else {
