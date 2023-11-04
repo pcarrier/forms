@@ -1,10 +1,10 @@
-{ #c "Primitives."
+{ #c Primitives
   halt %0  noop %1  eval %2  kind %3  size %4
   untag %5  tag %6
-  fault %7  enter %8  leave %9  clear-stream %10  clear-data %11
+  fault %7  enter %8  leave %9  clear-stream %10  clear-data %11  become %12
   #c [ 'TODO recv %16  send %17 ]
   read %20  discard-stream %21
-  push %24  pop %25  set %30  get %31  has %32
+  lpush %22  lpop %23  rpush %24  rpop %25  set %30  get %31  has %32
   <data %33  <stream %34  <contexts %35
   drop %48  pick %49  swap %51
   >stor %52  stor> %53
@@ -17,7 +17,7 @@
   >f16 %90  >f32 %91  >f64 %92
   >str %93  >sym %94  >bin %95  >vec %96
 
-  #c 'Constants
+  #c Constants
   CodeTag #u64 6
   TagKind #u8 0
   UndefKind #u8 1  NullKind #u8 2  BoolKind #u8 3
@@ -46,19 +46,22 @@
   dup ( #u8 0 pick )
   over ( #u8 1 pick )
   over2 ( #u8 2 pick )
-  rot ( [ ] swap push swap push swap push dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
+  rot ( [ ] swap rpush swap rpush swap rpush dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
 
-  #c 'Scopes
+  #c Scopes
   locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
   def ( #u8 3 read #u8 2 read ( <contexts #u8 0 get dup map? ! [ "top-most context must be a map" fault ] when rot rot set leave %8 #u8 2 discard-stream ) )
 
   #c "Control flow"
-  if    ( [ ] swap push swap push swap >u8 get eval )
+  if    ( [ ] swap rpush swap rpush swap >u8 get eval )
   when  ( [ ] if )
   do-while ( [ [ ~do-while~ ] when ] + dup >immediate
              { } swap '~do-while~ >sym swap set
              enter eval leave ) 
-  while ( [ ~while~ ] + push [ when ] + dup >immediate
+  while ( [ ~while~ ] + rpush [ when ] + dup >immediate
           { } swap '~while~ >sym swap set
           enter eval leave )
+
+  #c Convenience
+  <cont ( <data [ ] swap rpush <contexts rpush <stream ( lpop drop rpush ) )
   get-or ( over2 over2 has [ drop get ] [ swap drop swap drop ] if ) } %8

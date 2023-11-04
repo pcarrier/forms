@@ -5,14 +5,22 @@ type
   Status* = enum
     RUNNING, FAULT, HALT
   PCode = enum
-    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6, FAULT = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11, R12 = 12, R13 = 13, R14 = 14, R15 = 15,
-    RECV = 16, SEND = 17, R18 = 18, R19 = 19, READ = 20, DISCARD_STREAM = 21, R22 = 22, R23 = 23,
-    PUSH = 24, POP = 25, R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, HAS = 32,
-    PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35, R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
-    DROP = 48, PICK = 49, R50, SWAP = 51, TO_STOR = 52, FROM_STOR = 53, R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
-    ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68 = 68, MOD = 69, DIVMOD = 70, POW = 71, LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81
-    TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85, TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89, TO_F16 = 90, TO_F32 = 91, TO_F64 = 92, TO_STR = 93, TO_SYM = 94, TO_BIN = 95, TO_VEC = 96
-  RefDeq* = Deque[Ref]
+    HALT = 0, NOOP = 1, EVAL = 2, KIND = 3, SIZE = 4, UNTAG = 5, TAG = 6,
+    FAULT = 7, ENTER = 8, LEAVE = 9, CLEAR_STREAM = 10, CLEAR_DATA = 11, BECOME = 12,
+    R13 = 13, R14 = 14, R15 = 15,
+    RECV = 16, SEND = 17, R18 = 18, R19 = 19, READ = 20, DISCARD_STREAM = 21,
+    LPUSH = 22, LPOP = 23, RPUSH = 24, RPOP = 25,
+    R26 = 26, R27 = 27, R28 = 28, R29 = 29, SET = 30, GET = 31, HAS = 32,
+    PUSH_DATA = 33, PUSH_STREAM = 34, PUSH_CONTEXTS = 35,
+    R36 = 36, R37 = 37, R38 = 38, R39 = 39, R40 = 40, R41 = 41, R42 = 42, R43 = 43, R44 = 44, R45 = 45, R46 = 46, R47 = 47,
+    DROP = 48, PICK = 49, R50, SWAP = 51, TO_STOR = 52, FROM_STOR = 53,
+    R54 = 54, R55 = 55, R56 = 56, R57 = 57, R58 = 58, R59 = 59, R60 = 60, R61 = 61, R62 = 62, R63 = 63,
+    ADD = 64, SUB = 65, PROD = 66, DIV = 67, R68 = 68, MOD = 69, DIVMOD = 70, POW = 71,
+    LT = 72, GT = 73, EQ = 74, LE = 75, GE = 76, AND = 77, OR = 78, NOT = 79, SHL = 80, SHR = 81,
+    TO_U8 = 82, TO_U16 = 83, TO_U32 = 84, TO_U64 = 85,
+    TO_I8 = 86, TO_I16 = 87, TO_I32 = 88, TO_I64 = 89,
+    TO_F16 = 90, TO_F32 = 91, TO_F64 = 92,
+    TO_STR = 93, TO_SYM = 94, TO_BIN = 95, TO_VEC = 96
   ChannelKind = enum
     Refs, Executable
   ExecutableChannel = object
@@ -60,7 +68,7 @@ proc lookup(vm: ptr VM, ctx: Ref, r: Ref): Ref =
       for octx in vm.contexts:
         if octx != ctx:
           nvm.contexts.addLast(octx)
-      nvm.stream = ctx.tagged.vec.toDeque()
+      nvm.stream = ctx.tagged.vec
       nvm.addr.advance()
       if nvm.status == HALT and nvm.data.len > 0:
         return nvm.data[^1]
@@ -95,7 +103,10 @@ proc add(vm: ptr VM) =
   of I8: vm.data.addLast((a.i8 + b.i8).reform)
   of Str: vm.data.addLast((a.str & b.str).reform)
   of Bin: vm.data.addLast((a.bin & b.bin).reform)
-  of Vec: vm.data.addLast((a.vec & b.vec).reform)
+  of Vec:
+    var ab = a.vec
+    for x in b.vec.items: ab.addLast(x)
+    vm.data.addLast(ab.reform)
   of Map:
     var res = a.map
     for k, v in b.map: res[k] = v
@@ -621,16 +632,16 @@ proc toVec(vm: ptr VM) =
   let v = vm.data.popLast
   case v.kind:
   of Map:
-    var res = newSeq[Ref]()
-    for (k, v) in v.map.pairs: res.add([k, v].toSeq().reform)
+    var res = initDeque[Ref]()
+    for (k, v) in v.map.pairs: res.addLast([k, v].toDeque().reform)
     vm.data.addLast(res.form.refer)
   of Str:
-    var res = newSeq[Ref]()
-    for c in v.str: res.add(uint8(c).reform)
+    var res = initDeque[Ref]()
+    for c in v.str: res.addLast(uint8(c).reform)
     vm.data.addLast(res.form.refer)
   of Bin:
-    var res = newSeq[Ref]()
-    for c in v.bin: res.add(uint8(c).reform)
+    var res = initDeque[Ref]()
+    for c in v.bin: res.addLast(uint8(c).reform)
     vm.data.addLast(res.form.refer)
   else: raise newException(Invalid, &"unsupported kind {v.kind}")
 
@@ -673,6 +684,21 @@ proc eval(vm: ptr VM, c: uint8) =
     vm.stream.clear
   of CLEAR_DATA:
     vm.data.clear
+  of BECOME:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let cont = vm.data.popLast
+    if cont.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {cont.kind}")
+    if cont.vec.len < 3: raise newException(Invalid, "cont needs at least 3 elements")
+    if cont.vec[0].kind != Vec or cont.vec[1].kind != Vec or cont.vec[2].kind != Vec: raise newException(Invalid, "cont needs 3 Vec elements")
+    vm.data.clear
+    for r in cont.vec[0].vec:
+      vm.data.addLast(r)
+    vm.contexts.clear
+    for r in cont.vec[1].vec:
+      vm.contexts.addLast(r)
+    vm.stream.clear
+    for r in cont.vec[2].vec:
+      vm.stream.addLast(r)
   of RECV, SEND: raise newException(Invalid, &"we don't know how to send yet") # FIXME
   of READ:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
@@ -686,21 +712,40 @@ proc eval(vm: ptr VM, c: uint8) =
     let n = try: f[].toInt except: raise newException(Invalid, &"invalid discard size {f}")
     if n < 0 or n > vm.stream.len: raise newException(Invalid, &"index out of bounds {n}")
     for i in 1 .. n: vm.stream.popFirst
-  of PUSH:
+  of LPUSH:
     if vm.data.len < 2: raise newException(Invalid, "deque underflow")
     let x = vm.data.popLast
     let xs = vm.data.popLast
     if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
     var res = xs[]
-    res.vec.add(x)
+    res.vec.addFirst(x)
     vm.data.addLast(res.refer)
-  of POP:
+  of LPOP:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     let xs = vm.data.popLast
     if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
     if xs.vec.len < 1: raise newException(Invalid, "vec underflow")
-    vm.data.addLast(xs.vec[0..^2].reform)
-    vm.data.addLast(xs.vec[^1])
+    var vec = xs.vec
+    let elem = vec.popFirst()
+    vm.data.addLast(vec.reform)
+    vm.data.addLast(elem)
+  of RPUSH:
+    if vm.data.len < 2: raise newException(Invalid, "deque underflow")
+    let x = vm.data.popLast
+    let xs = vm.data.popLast
+    if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
+    var res = xs[]
+    res.vec.addLast(x)
+    vm.data.addLast(res.refer)
+  of RPOP:
+    if vm.data.len < 1: raise newException(Invalid, "deque underflow")
+    let xs = vm.data.popLast
+    if xs.kind != Vec: raise newException(Invalid, &"kind mismatch: expected Vec, found {xs.kind}")
+    if xs.vec.len < 1: raise newException(Invalid, "vec underflow")
+    var vec = xs.vec
+    let elem = vec.popLast()
+    vm.data.addLast(vec.reform)
+    vm.data.addLast(elem)
   of SET:
     if vm.data.len < 3: raise newException(Invalid, "deque underflow")
     let v = vm.data.popLast
@@ -757,11 +802,11 @@ proc eval(vm: ptr VM, c: uint8) =
       vm.data.addLast((offset >= 0 and offset < c.bin.len).reform)
     else: raise newException(Invalid, &"kind mismatch: expected Map, Vec, Str, or Bin, found {c.kind}")
   of PUSH_DATA:
-    vm.data.addLast(toSeq(vm.data.items).reform)
+    vm.data.addLast(vm.data.reform)
   of PUSH_STREAM:
-    vm.data.addLast(toSeq(vm.stream.items).reform)
+    vm.data.addLast(vm.stream.reform)
   of PUSH_CONTEXTS:
-    vm.data.addLast(toSeq(vm.contexts.items).reform)
+    vm.data.addLast(vm.contexts.reform)
   of DROP:
     if vm.data.len < 1: raise newException(Invalid, "deque underflow")
     discard vm.data.popLast
@@ -817,7 +862,7 @@ proc eval(vm: ptr VM, c: uint8) =
   of TO_SYM: vm.toSym
   of TO_VEC: vm.toVec
   of TO_BIN: vm.toBin
-  of R12, R13, R14, R15, R18, R19, R22, R23, R26, R27,
+  of R13, R14, R15, R18, R19, R26, R27,
     R28, R29, R36, R37, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R50, R54,
     R55, R56, R57, R58, R59, R60, R61, R62, R63, R68:
     raise newException(Invalid, &"illegal primitive {c}")
@@ -837,7 +882,7 @@ proc eval(vm: ptr VM, r: Ref) =
         vm.eval(r.tagged.u8)
       of Vec:
         let vec = r.tagged.vec
-        for i in countdown(vec.high, vec.low): vm.stream.addFirst(vec[i])
+        for e in vec.items.toSeq.reversed: vm.stream.addFirst(e)
       else:
         vm.data.addLast(r)
     else:

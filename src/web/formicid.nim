@@ -48,12 +48,12 @@ proc html(rs: RefDeq): string =
   result.add(&"</table>")
 
 proc html(vm: ptr VM): string =
-  result.add("<table>")
   let status = case vm.status
-  of FAULT: &"<em>{vm.fault}</em>"
+  of FAULT: &"<span class=\"fault\">{vm.fault}</div>"
   else: $vm.status
-  result.add("<tr><th>Status</th><th>Contexts</th><th>Data</th><th>Stream</th></tr>")
-  result.add(&"<tr><td>{status}<br/>step {vm.step}</td><td>{vm.contexts.html}</td><td>{vm.data.html}</td><td>{vm.stream.html}</td></tr>")
+  result.add(&"<p>{status} (step {vm.step})</p><table>")
+  result.add("<tr><th>Contexts</th><th>Data</th><th>Stream</th></tr>")
+  result.add(&"<tr><td>{vm.contexts.html}</td><td>{vm.data.html}</td><td>{vm.stream.html}</td></tr>")
   result.add("</table>")
 
 proc display(vm: ptr VM) =

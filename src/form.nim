@@ -1,4 +1,4 @@
-import std/[hashes, tables]
+import std/[deques, hashes, tables]
 
 type
   Kind* = enum
@@ -23,6 +23,8 @@ type
     F32 = 49
     F16 = 50
   Ref* = ref Form
+  RefDeq* = Deque[Ref]
+  RefMap* = OrderedTable[Ref, Ref]
   Form* = object
     case kind*: Kind:
     of Tag:
@@ -34,8 +36,8 @@ type
     of Sym: sym*: string
     of Str: str*: string
     of Bin: bin*: string
-    of Vec: vec*: seq[Ref]
-    of Map: map*: OrderedTable[Ref, Ref]
+    of Vec: vec*: RefDeq
+    of Map: map*: RefMap
     of U64: u64*: uint64
     of U32: u32*: uint32
     of U16: u16*: uint16
@@ -117,7 +119,7 @@ func form*(value: bool): Form = Form(kind: Bool, b: value)
 func form*(value: string): Form = Form(kind: Str, str: value)
 func formSym*(value: string): Form = Form(kind: Sym, sym: value)
 func formBin*(value: string): Form = Form(kind: Bin, bin: value)
-func form*(value: seq[Ref]): Form = Form(kind: Vec, vec: value)
+func form*(value: RefDeq): Form = Form(kind: Vec, vec: value)
 func form*(value: OrderedTable[Ref, Ref]): Form = Form(kind: Map, map: value)
 func form*(value: uint64): Form = Form(kind: U64, u64: value)
 func form*(value: uint32): Form = Form(kind: U32, u32: value)

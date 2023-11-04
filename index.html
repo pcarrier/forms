@@ -126,6 +126,11 @@
         margin: 0 0 0 1em;
         padding: 0;
       }
+
+      .fault {
+        background-color: #f00;
+        color: #fff;
+      }
     </style>
   </head>
 
@@ -229,11 +234,8 @@ leave</a></pre>
       </p>
       <p>
         <button onclick="$worker.postMessage([0, [-3]]);">de-fault</button>
-        <button
-          onclick="$worker.postMessage([0, [1, 'clear-data clear-stream']]);"
-        >
-          clear-data clear-stream
-        </button>
+        <button onclick="$worker.postMessage([0, [1, 'clear-data']]);">clear-data</button>
+        <button onclick="$worker.postMessage([0, [1, 'clear-stream']]);">clear-stream</button>
       </p>
     </div>
     <div id="target"></div>

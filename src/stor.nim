@@ -1,4 +1,4 @@
-import std/[base64, parseutils, intsets, tables], form, sss
+import std/[base64, deques, parseutils, intsets, tables], form, sss
 
 func parse(src: openArray[Token]; i: var int,  elided: var bool): Form
 
@@ -10,7 +10,7 @@ func parseVec(src: openArray[Token]; i: var int, elided: var bool, sep: string):
       (src[i].kind != Symbol or src[i].quoting != None or src[i].value != sep):
     let elem = new Ref
     elem[] = parse(src, i, elided)
-    result.vec.add(elem)
+    result.vec.addLast(elem)
   if i == len(src):
     raise newException(ParseError, "unterminated vector")
   inc i
