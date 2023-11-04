@@ -1,0 +1,122 @@
+@font-face {
+  font-family: "PragmataPro";
+  font-style: normal;
+  font-weight: 400;
+  src: url(/fonts/PragmataProR_liga_0829.woff2) format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PragmataPro";
+  font-style: normal;
+  font-weight: 700;
+  src: url(/fonts/PragmataProB_liga_0829.woff2) format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PragmataPro";
+  font-style: italic;
+  font-weight: 400;
+  src: url(/fonts/PragmataProI_liga_0829.woff2) format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PragmataPro";
+  font-style: italic;
+  font-weight: 700;
+  src: url(/fonts/PragmataProZ_liga_0829.woff2) format("woff2");
+  font-display: swap;
+}
+
+* {
+  font-family: PragmataPro, monospace;
+  text-align: center;
+}
+
+a,
+a:visited {
+  text-decoration: none;
+  color: #ff0;
+}
+
+html {
+  max-width: 80em;
+  font-size: 10pt;
+  margin: 0 auto 0 auto;
+  padding: 2em;
+  color: #ccc;
+  background-color: #222;
+}
+
+h1 > span {
+  color: #888;
+}
+
+input,
+button,
+textarea {
+  color: #fff;
+  background-color: #111;
+  border: 1px solid #ccc;
+  font-size: 100%;
+}
+
+textarea#instructions,
+pre {
+  text-align: left;
+  width: 100%;
+  margin: 0.5em auto 0.5em auto;
+}
+
+h1,
+h2,
+h3,
+tt,
+pre {
+  color: #fff;
+}
+
+pre {
+  background-color: #111;
+}
+
+footer {
+  margin: 2em auto 0 auto;
+  font-size: 80%;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  vertical-align: top;
+  padding: 0.5em;
+}
+
+dd,
+dt,
+li {
+  text-align: left;
+}
+
+dl {
+  margin: 0;
+}
+
+dd,
+ol,
+ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+}
+
+.fault {
+  background-color: #f00;
+  color: #fff;
+}

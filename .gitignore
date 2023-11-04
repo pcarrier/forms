@@ -1,4 +1,5 @@
-/fonts/
+/dist/
+/node_modules/
 /testresults/
 /tests/sss/tsss
 /tests/stor/tstor

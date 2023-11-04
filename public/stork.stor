@@ -44,6 +44,7 @@
 
   #c "Stack manipulation"
   dup ( #u8 0 pick )
+  nip ( swap drop )
   over ( #u8 1 pick )
   over2 ( #u8 2 pick )
   rot ( [ ] swap rpush swap rpush swap rpush dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )

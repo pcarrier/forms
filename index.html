@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,130 +8,6 @@
       name="description"
       content="formic, a naive but expressive concatenative homoiconic language for interactive computing"
     />
-    <style>
-      @font-face {
-        font-family: "PragmataPro";
-        font-style: normal;
-        font-weight: 400;
-        src: url(fonts/PragmataProR_liga_0829.woff2) format("woff2");
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "PragmataPro";
-        font-style: normal;
-        font-weight: 700;
-        src: url(fonts/PragmataProB_liga_0829.woff2) format("woff2");
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "PragmataPro";
-        font-style: italic;
-        font-weight: 400;
-        src: url(fonts/PragmataProI_liga_0829.woff2) format("woff2");
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "PragmataPro";
-        font-style: italic;
-        font-weight: 700;
-        src: url(fonts/PragmataProZ_liga_0829.woff2) format("woff2");
-        font-display: swap;
-      }
-
-      * {
-        font-family: PragmataPro, monospace;
-        text-align: center;
-      }
-
-      a,
-      a:visited {
-        text-decoration: none;
-        color: #ff0;
-      }
-
-      html {
-        max-width: 80em;
-        font-size: 10pt;
-        margin: 0 auto 0 auto;
-        padding: 2em;
-        color: #ccc;
-        background-color: #222;
-      }
-
-      h1 > span {
-        color: #888;
-      }
-
-      input,
-      button,
-      textarea {
-        color: #fff;
-        background-color: #111;
-        border: 1px solid #ccc;
-        font-size: 100%;
-      }
-
-      textarea#instructions,
-      pre {
-        text-align: left;
-        width: 100%;
-        margin: 0.5em auto 0.5em auto;
-      }
-
-      h1,
-      h2,
-      h3,
-      tt,
-      pre {
-        color: #fff;
-      }
-
-      pre {
-        background-color: #111;
-      }
-
-      footer {
-        margin: 2em auto 0 auto;
-        font-size: 80%;
-      }
-
-      table {
-        width: 100%;
-        table-layout: fixed;
-      }
-
-      th,
-      td {
-        border: 1px solid #ccc;
-        vertical-align: top;
-        padding: 0.5em;
-      }
-
-      dd,
-      dt,
-      li {
-        text-align: left;
-      }
-
-      dl {
-        margin: 0;
-      }
-
-      dd,
-      ol,
-      ul {
-        margin: 0 0 0 1em;
-        padding: 0;
-      }
-
-      .fault {
-        background-color: #f00;
-        color: #fff;
-      }
-    </style>
   </head>
 
   <body>
@@ -205,9 +81,9 @@ leave</a></pre>
 #u64 20 u64-fib</a></pre>
         <pre><a class="evaluable" href="#"
           >locally ( def xorshift64* ( dup #u64 0 = [ drop #u64 1 ] when
-                            dup #u8 12 >> |
-                            dup #u8 25 << |
-                            dup #u8 27 >> |
+                            dup #u8 12 &gt;&gt; |
+                            dup #u8 25 &lt;&lt; |
+                            dup #u8 27 &gt;&gt; |
                             #u64 2685821657736338717 * )
           #u64 0 #u8 0 [ dup #u8 10 &lt; ] [ over xorshift64* swap #u8 1 + ] while ) drop</a></pre>
         <h3>Aspirational</h3>
@@ -253,74 +129,6 @@ leave</a></pre>
       </p>
     </div>
     <div id="target"></div>
-    <script>
-      const r = document.getElementById("root"),
-        s = document.getElementById("stream"),
-        i = document.getElementById("instructions"),
-        t = document.getElementById("tuck"),
-        l = document.getElementById("log"),
-        g = document.getElementById("go"),
-        runImmediately = document.getElementById("run"),
-        steps = document.getElementById("steps"),
-        ipf = document.getElementById("ipf");
-
-      i.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && e.ctrlKey) {
-          e.preventDefault();
-          g.click();
-        }
-      });
-
-      function iResetSize() {
-        i.style.height = "0";
-        i.style.height = `${i.scrollHeight}px`;
-      }
-      i.addEventListener("input", iResetSize);
-      Array.from(document.querySelectorAll(".evaluable")).forEach((c) => {
-        c.onclick = (e) => {
-          e.preventDefault();
-          i.value = c.textContent;
-          iResetSize();
-        };
-      });
-
-      const worker = new Worker("worker.js");
-      window.$worker = worker;
-      window.$target = document.getElementById("target");
-      window.$refresh = false;
-      // First message indicates the worker has started.
-      worker.onmessage = (evt) => {
-        if (evt.data) {
-          console.log(`Failed loading: ${evt.data}`);
-        } else {
-          const raf = () => {
-            if ($refresh) {
-              worker.postMessage([0, [-1, ipf.value], [-2]]);
-            }
-            requestAnimationFrame(raf);
-          };
-          requestAnimationFrame(raf);
-          worker.onmessage = (evt) => eval(evt.data);
-          r.style.display = "block";
-        }
-      };
-
-      s.addEventListener("submit", (e) => {
-        e.preventDefault();
-        let log = document.createElement("pre");
-        log.textContent = i.value;
-        l.appendChild(log);
-        worker.postMessage([0, [Number(t.checked), i.value]]);
-        if (runImmediately.checked) {
-          $refresh = true;
-        } else {
-          $refresh = false;
-        }
-      });
-
-      function step() {
-        $worker.postMessage([0, [-1, steps.value], [-2]]);
-      }
-    </script>
+    <script type="module" src="src/main.ts"></script>
   </body>
 </html>
