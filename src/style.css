@@ -67,7 +67,7 @@ textarea#instructions,
 pre {
   text-align: left;
   width: 100%;
-  margin: 0.5em auto 0.5em auto;
+  margin: 1px auto 1px auto;
 }
 
 h1,
@@ -120,5 +120,5 @@ th, td {
 
 #log {
   max-height: 10em;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
