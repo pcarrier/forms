@@ -8,7 +8,7 @@ Spaces are separators outside of double quotes and escape sequences, and not req
 
 Strings are prefixed by `'` or delimited by `"`.
 
-The rest is symbols. They can be delimited by `\"` and `"`.
+The rest is symbols. They can be prefixed by `\'`, or delimited by `\"` and `"`.
 
 Quoting is preserved by parsers and printers, and meaningful in some circumstances (eg in [STOR](#simple-textual-object-representation-stor), `[` starts a vector but `\'[` does not).
 
