@@ -11,7 +11,7 @@ function App({ worker }: { worker: Worker }) {
   const [tuck, setTuck] = useState(true);
   const [runImmediately, setRunImmediately] = useState(true);
   const refresh = useRef(false);
-  const ipf = useRef(65536);
+  const ipf = useRef(50000);
   const [steps, setSteps] = useState(1);
   const [logs, setLogs] = useState<string[]>([]);
   const [storm, setStorm] = useState<Sap>([Type.Undef]);
