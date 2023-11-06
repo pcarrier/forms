@@ -1,6 +1,6 @@
 const examples = {
   numerals: `[ #u8 42 #f64 3.14159265358979323846
-  swap >f64 * >u8 ] eval`,
+  swap >f64 * >u16 #u16 3 /% ] eval`,
   factorial: `{ u64-factorial ( #u64 1
                   [ over #u64 1 > ]
                   [ over * swap #u64 1 - swap ] while

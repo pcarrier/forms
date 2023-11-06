@@ -1,4 +1,4 @@
-import std/[algorithm, bitops, deques, parseutils, sequtils, strformat, tables], form, json, sap, stor, sss
+import std/[algorithm, bitops, deques, math, parseutils, sequtils, strformat, tables], form, json, sap, stor, sss
 
 type
   Invalid* = object of CatchableError
@@ -84,6 +84,21 @@ proc lookup(vm: ptr VM, r: Ref): Ref =
     result = vm.lookup(ctx, r)
     if not result.isNil: break
 
+proc size(vm: ptr VM) =
+  if vm.data.len < 1: raise newException(Invalid, "deque underflow: size requires 1 form")
+  let v = vm.data.popLast
+  case v.kind:
+  of Map: vm.data.addLast(v.map.len.reform)
+  of Vec: vm.data.addLast(v.vec.len.reform)
+  of Bin: vm.data.addLast(v.bin.len.reform)
+  of Str: vm.data.addLast(v.str.len.reform)
+  of Sym: vm.data.addLast(v.sym.len.reform)
+  of U64, I64, F64: vm.data.addLast(8'u8.reform)
+  of U32, I32, F32: vm.data.addLast(4'u8.reform)
+  of U16, I16, F16: vm.data.addLast(2'u8.reform)
+  of U8, I8: vm.data.addLast(1'u8.reform)
+  else: raise newException(Invalid, &"no size for {v.kind}")
+
 proc add(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow: addition requires 2 forms")
   let b = vm.data.popLast
@@ -132,21 +147,6 @@ proc sub(vm: ptr VM) =
   of I8: vm.data.addLast((a.i8 - b.i8).reform)
   else: raise newException(Invalid, &"cannot subtract {a.kind}")
 
-proc size(vm: ptr VM) =
-  if vm.data.len < 1: raise newException(Invalid, "deque underflow: size requires 1 form")
-  let v = vm.data.popLast
-  case v.kind:
-  of Map: vm.data.addLast(v.map.len.reform)
-  of Vec: vm.data.addLast(v.vec.len.reform)
-  of Bin: vm.data.addLast(v.bin.len.reform)
-  of Str: vm.data.addLast(v.str.len.reform)
-  of Sym: vm.data.addLast(v.sym.len.reform)
-  of U64, I64, F64: vm.data.addLast(8'u8.reform)
-  of U32, I32, F32: vm.data.addLast(4'u8.reform)
-  of U16, I16, F16: vm.data.addLast(2'u8.reform)
-  of U8, I8: vm.data.addLast(1'u8.reform)
-  else: raise newException(Invalid, &"no size for {v.kind}")
-
 proc mult(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow: multiplication requires 2 forms")
   let a = vm.data.popLast
@@ -165,6 +165,92 @@ proc mult(vm: ptr VM) =
   of U8: vm.data.addLast((a.u8 * b.u8).reform)
   of I8: vm.data.addLast((a.i8 * b.i8).reform)
   else: raise newException(Invalid, &"cannot multiply {a.kind}")
+
+proc divide(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow: division requires 2 forms")
+  let b = vm.data.popLast
+  let a = vm.data.popLast
+  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch in division: {a.kind} ≠ {b.kind}")
+  case a.kind:
+  of U64: vm.data.addLast((a.u64 div b.u64).reform)
+  of I64: vm.data.addLast((a.i64 div b.i64).reform)
+  of F64: vm.data.addLast((a.f64 / b.f64).formF64.refer)
+  of U32: vm.data.addLast((a.u32 div b.u32).reform)
+  of I32: vm.data.addLast((a.i32 div b.i32).reform)
+  of F32: vm.data.addLast((a.f32 / b.f32).formF32.refer)
+  of U16: vm.data.addLast((a.u16 div b.u16).reform)
+  of I16: vm.data.addLast((a.i16 div b.i16).reform)
+  of F16: vm.data.addLast((a.f16 / b.f16).formF16.refer)
+  of U8: vm.data.addLast((a.u8 div b.u8).reform)
+  of I8: vm.data.addLast((a.i8 div b.i8).reform)
+  else: raise newException(Invalid, &"cannot divide {a.kind}")
+
+proc modulo(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow: modulo requires 2 forms")
+  let b = vm.data.popLast
+  let a = vm.data.popLast
+  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch in modulo: {a.kind} ≠ {b.kind}")
+  case a.kind:
+  of U64: vm.data.addLast((a.u64 mod b.u64).reform)
+  of I64: vm.data.addLast((a.i64 mod b.i64).reform)
+  of U32: vm.data.addLast((a.u32 mod b.u32).reform)
+  of I32: vm.data.addLast((a.i32 mod b.i32).reform)
+  of U16: vm.data.addLast((a.u16 mod b.u16).reform)
+  of I16: vm.data.addLast((a.i16 mod b.i16).reform)
+  of U8: vm.data.addLast((a.u8 mod b.u8).reform)
+  of I8: vm.data.addLast((a.i8 mod b.i8).reform)
+  else: raise newException(Invalid, &"cannot modulo {a.kind}")
+
+proc divmod(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow: division+modulo requires 2 forms")
+  let a = vm.data.popLast
+  let b = vm.data.popLast
+  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch in division+modulo: {a.kind} ≠ {b.kind}")
+  case a.kind:
+  of U64:
+    vm.data.addLast((a.u64 div b.u64).reform)
+    vm.data.addLast((a.u64 mod b.u64).reform)
+  of I64:
+    vm.data.addLast((a.i64 div b.i64).reform)
+    vm.data.addLast((a.i64 mod b.i64).reform)
+  of U32:
+    vm.data.addLast((a.u32 div b.u32).reform)
+    vm.data.addLast((a.u32 mod b.u32).reform)
+  of I32:
+    vm.data.addLast((a.i32 div b.i32).reform)
+    vm.data.addLast((a.i32 mod b.i32).reform)
+  of U16:
+    vm.data.addLast((a.u16 div b.u16).reform)
+    vm.data.addLast((a.u16 mod b.u16).reform)
+  of I16:
+    vm.data.addLast((a.i16 div b.i16).reform)
+    vm.data.addLast((a.i16 mod b.i16).reform)
+  of U8:
+    vm.data.addLast((a.u8 div b.u8).reform)
+    vm.data.addLast((a.u8 mod b.u8).reform)
+  of I8:
+    vm.data.addLast((a.i8 div b.i8).reform)
+    vm.data.addLast((a.i8 mod b.i8).reform)
+  else: raise newException(Invalid, &"cannot divide+modulo {a.kind}")
+
+proc pow(vm: ptr VM) =
+  if vm.data.len < 2: raise newException(Invalid, "deque underflow: power requires 2 forms")
+  let b = vm.data.popLast
+  let a = vm.data.popLast
+  if a.kind != b.kind: raise newException(Invalid, &"kind mismatch in power: {a.kind} ≠ {b.kind}")
+  case a.kind:
+  of U64: vm.data.addLast((a.u64 ^ b.u64).reform)
+  of I64: vm.data.addLast((a.i64 ^ b.i64).reform)
+  of F64: vm.data.addLast(pow(a.f64, b.f64).formF64.refer)
+  of U32: vm.data.addLast((a.u32 ^ b.u32).reform)
+  of I32: vm.data.addLast((a.i32 ^ b.i32).reform)
+  of F32: vm.data.addLast(pow(a.f32, b.f32).formF32.refer)
+  of U16: vm.data.addLast((a.u16 ^ b.u16).reform)
+  of I16: vm.data.addLast((a.i16 ^ b.i16).reform)
+  of F16: vm.data.addLast(pow(a.f16, b.f16).formF16.refer)
+  of U8: vm.data.addLast((a.u8 ^ b.u8).reform)
+  of I8: vm.data.addLast((a.i8 ^ b.i8).reform)
+  else: raise newException(Invalid, &"cannot power {a.kind}")
 
 proc lt(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow: comparison requires 2 forms")
@@ -845,8 +931,10 @@ proc eval(vm: ptr VM, c: uint8) =
   of ADD: vm.add
   of SUB: vm.sub
   of MULT: vm.mult
-  of DIV, MOD, DIVMOD, POW:
-    raise newException(Invalid, &"unsupported operation %{c}")
+  of DIV: vm.divide
+  of MOD: vm.modulo
+  of DIVMOD: vm.divmod
+  of POW: vm.pow
   of LT: vm.lt
   of GT: vm.gt
   of EQ: vm.eq
