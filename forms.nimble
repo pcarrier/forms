@@ -14,3 +14,8 @@ task test, "Run test suite":
 
 task serve, "Run an HTTP server":
   exec "python3 -mhttp.server"
+
+task deploy, "Deploy to horse":
+  exec "nimble build"
+  exec "pnpm build"
+  exec "rsync -avP dist/ horse:formic.id/"
