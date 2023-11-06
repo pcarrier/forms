@@ -131,7 +131,7 @@ function App({ worker }: { worker: Worker }) {
         forms/frame
       </p>
       <p>
-        <button onClick={() => worker.postMessage([0, [-3]])}>de-fault</button>{" "}
+        <button onClick={() => worker.postMessage([0, [-3], [-2]])}>de-fault</button>{" "}
         <button onClick={() => worker.postMessage([0, [1, "clear-data"], [-2]])}>
           clear-data
         </button>{" "}

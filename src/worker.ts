@@ -17,7 +17,6 @@ import stork from "./stork.stor?raw";
         switch (fmt) {
           case -3:
             deFault(slot);
-            displayVM(slot);
             break;
           case -2:
             displayVM(slot);
