@@ -203,8 +203,8 @@ proc modulo(vm: ptr VM) =
 
 proc divmod(vm: ptr VM) =
   if vm.data.len < 2: raise newException(Invalid, "deque underflow: division+modulo requires 2 forms")
-  let a = vm.data.popLast
   let b = vm.data.popLast
+  let a = vm.data.popLast
   if a.kind != b.kind: raise newException(Invalid, &"kind mismatch in division+modulo: {a.kind} ≠ {b.kind}")
   case a.kind:
   of U64:
