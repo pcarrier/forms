@@ -62,20 +62,20 @@ proc lookup(vm: ptr VM, ctx: Ref, r: Ref): Ref =
   case ctx.kind:
   of Map:
     try: return ctx.map[r] except: return nil
-  of Tag:
-    if ctx.tag == CODE_TAG and ctx.tagged.kind == Vec:
-      var nvm = initVM()
-      defer: vm.step += nvm.step
-      nvm.data.addFirst(r)
-      for octx in vm.contexts:
-        if octx != ctx:
-          nvm.contexts.addLast(octx)
-      nvm.stream = ctx.tagged.vec
-      nvm.addr.advance()
-      if nvm.status == HALT and nvm.data.len > 0:
-        return nvm.data[^1]
-      else:
-        return nil
+  # of Tag:
+  #   if ctx.tag == CODE_TAG and ctx.tagged.kind == Vec:
+  #     var nvm = initVM()
+  #     defer: vm.step += nvm.step
+  #     nvm.data.addFirst(r)
+  #     for octx in vm.contexts:
+  #       if octx != ctx:
+  #         nvm.contexts.addLast(octx)
+  #     nvm.stream = ctx.tagged.vec
+  #     nvm.addr.advance()
+  #     if nvm.status == HALT and nvm.data.len > 0:
+  #       return nvm.data[^1]
+  #     else:
+  #       return nil
   else: discard
   return nil
 

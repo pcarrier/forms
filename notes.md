@@ -36,9 +36,4 @@ Forms are handled according to the following rules:
 - Symbols are replaced by look ups, then handling restarts;
 - All other values are pushed to the data stack.
 
-Look ups traverse the context stack from top to bottom until a form is found. If no form is available, the machine halts with an error.
-
-Each context is looked up based on its type:
-- Maps are looked up by key;
-- Vectors are evaluated as a stream in a machine with the same contexts except this one, starting with the looked up value on the data stack; if it halts, its top is the result.
-- The rest is ignored.
+Look ups traverse the context stack from top to bottom until a form is found. If no form is available, the machine halts with an error. Only map contexts are supported today, but one could eg evaluate vectors (see `lookup` comment in [storm.nim](src/storm.nim) and the accompanying example in [examples.ts](src/examples.ts)).

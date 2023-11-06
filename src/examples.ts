@@ -21,7 +21,7 @@ leave`,
                             dup #u8 27 << |
                             #u64 2685821657736338717 * )
           #u64 0 #u8 0 [ dup #u8 10 < ] [ over xorshift64* swap #u8 1 + ] while ) drop`,
-  dynamic: `[ { hello 'world } swap #u get-or dup undef? ! [ halt ] when ] >immediate enter hello leave`,
+  // dynamic: `[ { hello 'world } swap #u get-or dup undef? ! [ halt ] when ] >immediate enter hello leave`,
   aspiration1: `'/devenv fetch 'body get stor> eval`,
   aspiration2: `{ 'url 'https://pcarrier.com 'headers { 'accept 'application/cbor+form } } fetch 'body get cbor> eval`,
 };
