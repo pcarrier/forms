@@ -22,7 +22,10 @@ import stork from "./stork.stor?raw";
             displayVM(slot);
             break;
           case -1:
+            const start = performance.now();
             advance(slot, payload);
+            const elapsed = performance.now() - start;
+            if (elapsed > 10) console.log(`spent ${elapsed}ms`);
             break;
           default:
             if (typeof payload !== "string") payload = JSON.stringify(x);
