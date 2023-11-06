@@ -132,10 +132,10 @@ function App({ worker }: { worker: Worker }) {
       </p>
       <p>
         <button onClick={() => worker.postMessage([0, [-3]])}>de-fault</button>{" "}
-        <button onClick={() => worker.postMessage([0, [1, "clear-data"]])}>
+        <button onClick={() => worker.postMessage([0, [1, "clear-data"], [-2]])}>
           clear-data
         </button>{" "}
-        <button onClick={() => worker.postMessage([0, [1, "clear-stream"]])}>
+        <button onClick={() => worker.postMessage([0, [1, "clear-stream"], [-2]])}>
           clear-stream
         </button>
       </p>
