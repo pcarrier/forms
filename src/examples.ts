@@ -14,7 +14,7 @@ leave`,
                 swap
                 #u64 2 - u64-fib
                 + swap drop ] when )
-#u64 20 u64-fib`,
+#u64 25 u64-fib`,
   prng: `locally ( def xorshift64* ( dup #u64 0 = [ drop #u64 1 ] when
                             dup #u8 12 << |
                             dup #u8 25 >> |

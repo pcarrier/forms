@@ -11,6 +11,7 @@ proc sap(vm: ptr VM): string =
   return [
     ($vm.status).reform,
     vm.step.reform,
+    vm.primitive.reform,
     fault,
     vm.contexts.reform,
     vm.data.reform,

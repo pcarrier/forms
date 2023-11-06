@@ -35,7 +35,7 @@ const header = (
       <a href="https://github.com/pcarrier/formicid/blob/main/README.md">
         a bunch of documents
       </a>{' '}
-      and vague aspirations. Not pragmatic at all, and horrendously slow.
+      and vague aspirations. Not pragmatic at all, and as slow as it gets.
       <br />
       Fewer than 70kB of wasm bootstrapped with{' '}
       <a href="https://github.com/pcarrier/forms/blob/main/src/stork.stor">

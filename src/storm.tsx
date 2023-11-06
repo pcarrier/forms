@@ -14,7 +14,7 @@ function storm({ state }: { state: Sap }) {
       <tbody>
         <tr>
           <th>State</th>
-          <th>Step</th>
+          <th>Step &amp; primitive</th>
           <th>Fault</th>
         </tr>
         <tr>
@@ -23,9 +23,10 @@ function storm({ state }: { state: Sap }) {
           </td>
           <td>
             <SapView value={state[2] as Sap} />
+            <SapView value={state[3] as Sap} />
           </td>
           <td>
-            <SapView value={state[3] as Sap} />
+            <SapView value={state[4] as Sap} />
           </td>
         </tr>
         <tr>
@@ -35,13 +36,13 @@ function storm({ state }: { state: Sap }) {
         </tr>
         <tr>
           <td>
-            <SapView value={state[4] as Sap} />
-          </td>
-          <td>
             <SapView value={state[5] as Sap} />
           </td>
           <td>
             <SapView value={state[6] as Sap} />
+          </td>
+          <td>
+            <SapView value={state[7] as Sap} />
           </td>
         </tr>
       </tbody>

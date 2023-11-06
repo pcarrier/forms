@@ -62,6 +62,10 @@ textarea {
   font-size: 100%;
 }
 
+input[type=number] {
+  width: 8em;
+}
+
 pre {
   text-align: left;
   width: 100%;
@@ -88,9 +92,7 @@ footer {
 }
 
 table {
-  width: 100%;
-  table-layout: fixed;
-  border: none;
+  margin: 0 auto 0 auto;
 }
 
 th,
@@ -120,8 +122,9 @@ th, td {
   color: #88f;
 }
 
-.immediate {
-  border: 1px dotted #88f;
+.immediate::before {
+  color: #88f;
+  content: '()';
 }
 
 .num::before {

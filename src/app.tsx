@@ -11,7 +11,7 @@ function App({ worker }: { worker: Worker }) {
   const [tuck, setTuck] = useState(true);
   const [runImmediately, setRunImmediately] = useState(true);
   const refresh = useRef(false);
-  const ipf = useRef(10000);
+  const ipf = useRef(65536);
   const [steps, setSteps] = useState(1);
   const [logs, setLogs] = useState<string[]>([]);
   const [storm, setStorm] = useState<Sap>([Type.Undef]);
@@ -110,6 +110,7 @@ function App({ worker }: { worker: Worker }) {
           id="steps"
           type="number"
           value={steps}
+          min="1"
           onChange={(e) =>
             setSteps(Number((e.target as HTMLInputElement).value))
           }
@@ -121,8 +122,8 @@ function App({ worker }: { worker: Worker }) {
         <input
           id="ipf"
           type="number"
+          min="0"
           value={ipf.current}
-          step="1000"
           onChange={(e) =>
             (ipf.current = Number((e.target as HTMLInputElement).value))
           }
