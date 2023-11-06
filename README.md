@@ -4,7 +4,7 @@
 
 ## Barely Even Structured Text (BEST)
 
-Spaces are separators outside of double quotes and escape sequences, and not required.
+Spaces are separators outside of double quotes and escape sequences.
 
 Strings are prefixed by `'` or delimited by `"`.
 
@@ -25,7 +25,6 @@ Quoting is preserved by parsers and printers, and meaningful in some circumstanc
 - `b` backspace
 - `[0-9A-F][0-9A-F]` arbitrary byte in hex
 - `u[0-9A-F][0-9A-F][0-9A-F][0-9A-F]` unicode code point in hex (represented in UTF-8)
- 
 
 ## Simple Textual Object Representation (STOR)
 

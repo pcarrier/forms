@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo</title>
+    <style>
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: normal;
+        font-weight: 400;
+        src: url(/fonts/PragmataProR_liga_0829.woff2) format("woff2");
+        font-display: block;
+      }
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: normal;
+        font-weight: 700;
+        src: url(/fonts/PragmataProB_liga_0829.woff2) format("woff2");
+        font-display: block;
+      }
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: italic;
+        font-weight: 400;
+        src: url(/fonts/PragmataProI_liga_0829.woff2) format("woff2");
+        font-display: block;
+      }
+      @font-face {
+        font-family: "PragmataPro";
+        font-style: italic;
+        font-weight: 700;
+        src: url(/fonts/PragmataProZ_liga_0829.woff2) format("woff2");
+        font-display: block;
+      }
+      html { color: #fff; background-color: #000; font-family: PragmataPro, monospace; }
+      span.code { display: inline-block; white-space: pre; }
+      span.cont { display: inline-flex; align-items: last baseline; }
+      span.del, span.undel { font-size: 0; }
+      span.cont.curly { border: 3pt solid; border-top: none; border-bottom: none; border-radius: 6pt; padding: 1pt; margin: 1pt; }
+      span.cont.bracket { border: 1pt solid; padding: 1pt; margin: 1pt; }
+      span.cont.paren { border: 1pt solid; border-radius: 6pt; padding: 1pt; margin: 1pt; }
+    </style>
+  </head>
+  <body>
+    <p><textarea id="src" style="width:100%;height:5em;" oninput="gogogo()">{ #c Primitives
+halt %0  noop %1  eval %2  kind %3  size %4
+untag %5  tag %6
+fault %7  enter %8  leave %9  clear-stream %10  clear-data %11  become %12
+#c [ 'TODO recv %16  send %17 ]
+read %20  discard-stream %21
+lpush %22  lpop %23  rpush %24  rpop %25  set %30  get %31  has %32
+&lt;data %33  &lt;stream %34  &lt;contexts %35
+drop %48  pick %49  swap %51
+&gt;stor %52  stor&gt; %53  json&gt; %57  &gt;sap %58
++ %64  - %65  * %66  / %67  % %69  /% %70  ^ %71
+&lt; %72  &gt; %73  = %74  &lt;= %75  &gt;= %76
+& %77  | %78  ! %79  &lt;&lt; %80  &gt;&gt; %81
+&gt;u8 %82  &gt;u16 %83  &gt;u32 %84  &gt;u64 %85
+&gt;i8 %86  &gt;i16 %87  &gt;i32 %88  &gt;i64 %89
+&gt;f16 %90  &gt;f32 %91  &gt;f64 %92
+&gt;str %93  &gt;sym %94  &gt;bin %95  &gt;vec %96
+#c Constants
+CodeTag #u64 6
+TagKind #u8 0
+UndefKind #u8 1  NullKind #u8 2  BoolKind #u8 3
+SymKind #u8 8  StrKind #u8 9  BinKind #u8 10
+VecKind #u8 11  MapKind #u8 12
+U64Kind #u8 16  U32Kind #u8 17  U16Kind #u8 18  U8Kind #u8 19
+I64Kind #u8 32  I32Kind #u8 33  I16Kind #u8 34  I8Kind #u8 35
+F64Kind #u8 48  F32Kind #u8 49  F16Kind #u8 50
+
+#c "Kind tests"
+tag? ( kind Tag = )
+undef? ( #u = )  null? ( #n = )  bool? ( kind BoolKind = )
+sym? ( kind SymKind = )  str? ( kind StrKind = )  bin? ( kind BinKind = )
+vec? ( kind VecKind = )  map? ( kind MapKind = )
+container? ( kind #u8 3 &gt;&gt; 3 #u8 1 = )
+num? ( kind #u8 3 &gt;&gt; 3 #u8 2 &gt; )
+u? ( kind #u8 4 &gt;&gt; 4 #u8 1 = )
+i? ( kind #u8 4 &gt;&gt; 4 #u8 2 = )
+f? ( kind #u8 4 &gt;&gt; 4 #u8 3 = )
+
+#c "Code in and out"
+&gt;immediate ( CodeTag tag )
+immediate&gt; ( kind 0 = [ untag swap drop ] [ halt ] if )
+#c "Stack manipulation"
+dup ( #u8 0 pick )
+nip ( swap drop )
+over ( #u8 1 pick )
+over2 ( #u8 2 pick )
+rot ( [ ] swap rpush swap rpush swap rpush dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
+
+#c Scopes
+locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
+def ( #u8 3 read #u8 2 read ( &lt;contexts #u8 0 get dup map? !
+[ "top-most context must be a map" fault ] when
+rot rot set leave %8 #u8 2 discard-stream ) )
+
+#c "Control flow"
+if    ( [ ] swap rpush swap rpush swap &gt;u8 get eval )
+when  ( [ ] if )
+do-while ( [ [ ~do-while~ ] when ] + dup &gt;immediate
+{ } swap '~do-while~ &gt;sym swap set
+enter eval leave ) 
+while ( [ ~while~ ] + rpush [ when ] + dup &gt;immediate
+{ } swap '~while~ &gt;sym swap set
+enter eval leave )
+
+#c Convenience
+&lt;cont ( &lt;data [ ] swap rpush &lt;contexts rpush &lt;stream ( lpop drop rpush ) )
+get-or ( over2 over2 has [ drop get ] [ swap drop swap drop ] if ) } %8</textarea></p>
+    <div contenteditable="plaintext-only" spellcheck="false" style="padding: 0.5em;"><span id="dest"></div>
+    <script>
+      const src = document.getElementById('src');
+      const dest = document.getElementById('dest');
+      function gogogo() {
+        const c = src.value;
+        dest.innerHTML = c
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll(/'(\S*)/g, '<em>$1</em>')
+          .replaceAll(/"(.*)"/g, '<em>$1</em>')
+          .replaceAll(/\[\s*/g, `<span class="cont bracket"><span class="del" contenteditable="false">[</span><span class="code">`)
+          .replaceAll(/\(\s*/g, `<span class="cont paren"><span class="del" contenteditable="false">(</span><span class="code">`)
+          .replaceAll(/\{\s*/g, `<span class="cont curly"><span class="del" contenteditable="false">{</span><span class="code">`)
+          .replaceAll(/\s*([\]})])/g, '</span><span class="undel" contenteditable="false">$1</span></span>')
+          .replaceAll('<span class="code"></span>', '<span class="code"> </span>');
+      }
+      gogogo();
+    </script>
+  </body>
+</html>
