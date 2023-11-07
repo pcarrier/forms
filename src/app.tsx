@@ -68,7 +68,7 @@ function App({ worker }: { worker: Worker }) {
           </span>
         ))}
         <pre
-          contentEditable="plaintext-only"
+          contentEditable="true"
           id="instructions"
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
