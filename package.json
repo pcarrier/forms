@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "devDependencies": {
     "@types/react": "^18.2.35",
     "@types/react-dom": "^18.2.14",
     "@vitejs/plugin-react": "^4.1.1",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vitest": "^0.34.6"
   },
   "dependencies": {
     "million": "^2.6.4",
