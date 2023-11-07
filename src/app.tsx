@@ -109,7 +109,7 @@ function App({ worker }: { worker: Worker }) {
         <input
           id="steps"
           type="number"
-          value={steps}
+          defaultValue={steps}
           min="1"
           onChange={(e) =>
             setSteps(Number((e.target as HTMLInputElement).value))
@@ -123,7 +123,7 @@ function App({ worker }: { worker: Worker }) {
           id="ipf"
           type="number"
           min="0"
-          value={ipf.current}
+          defaultValue={ipf.current}
           onChange={(e) =>
             (ipf.current = Number((e.target as HTMLInputElement).value))
           }
