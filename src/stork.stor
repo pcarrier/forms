@@ -46,11 +46,17 @@
   nip ( swap drop )
   over ( #u8 1 pick )
   over2 ( #u8 2 pick )
-  rot ( [ ] swap rpush swap rpush swap rpush dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
+  rot ( [ ] swap rpush swap rpush swap rpush
+        dup #u8 1 get swap
+        dup #u8 2 get swap
+        #u8 0 get swap )
 
   #c Scopes
   locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
-  def ( #u8 3 read #u8 2 read ( <contexts #u8 0 get dup map? ! [ "top-most context must be a map" fault ] when rot rot set leave %8 #u8 2 discard-stream ) )
+  def ( #u8 3 read #u8 2 read ( <contexts #u8 0 get
+                                dup map? ! [ "top-most context must be a map" fault ] when
+                                rot rot set leave %8 #u8
+                                2 discard-stream ) )
 
   #c "Control flow"
   if    ( [ ] swap rpush swap rpush swap >u8 get eval )

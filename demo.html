@@ -60,6 +60,7 @@ drop %48  pick %49  swap %51
 &gt;i8 %86  &gt;i16 %87  &gt;i32 %88  &gt;i64 %89
 &gt;f16 %90  &gt;f32 %91  &gt;f64 %92
 &gt;str %93  &gt;sym %94  &gt;bin %95  &gt;vec %96
+
 #c Constants
 CodeTag #u64 6
 TagKind #u8 0
@@ -84,17 +85,22 @@ f? ( kind #u8 4 &gt;&gt; 4 #u8 3 = )
 #c "Code in and out"
 &gt;immediate ( CodeTag tag )
 immediate&gt; ( kind 0 = [ untag swap drop ] [ halt ] if )
+
 #c "Stack manipulation"
 dup ( #u8 0 pick )
 nip ( swap drop )
 over ( #u8 1 pick )
 over2 ( #u8 2 pick )
-rot ( [ ] swap rpush swap rpush swap rpush dup #u8 1 get swap dup #u8 2 get swap #u8 0 get swap )
+rot ( [ ] swap rpush swap rpush swap rpush
+dup #u8 1 get swap
+dup #u8 2 get swap
+#u8 0 get swap )
 
 #c Scopes
 locally ( #u8 1 read ( { } enter eval leave #u8 1 discard-stream ) )
-def ( #u8 3 read #u8 2 read ( &lt;contexts #u8 0 get dup map? !
-[ "top-most context must be a map" fault ] when
+def ( #u8 3 read #u8 2 read
+( &lt;contexts #u8 0 get
+dup map? ! [ "top-most context must be a map" fault ] when
 rot rot set leave %8 #u8 2 discard-stream ) )
 
 #c "Control flow"
