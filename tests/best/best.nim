@@ -1,6 +1,6 @@
-import std/unittest, sss
+import std/unittest, best
 
-suite "sss parser":
+suite "parser":
   test "parses the empty string":
     check(parse("").len == 0)
   test "parses a single token with spaces":
@@ -24,7 +24,7 @@ suite "sss parser":
       Token(kind: Symbol, quoting: Single, value: "\""),
       Token(kind: Symbol, quoting: Double, value: "\"")])
 
-suite "sss printer":
+suite "printer":
   test "prints the empty string":
     check(print(@[]) == "")
   test "prints tokens":
@@ -32,7 +32,7 @@ suite "sss printer":
     check(print(@[Token(kind: Symbol, quoting: Single, value: "sym")]) == "\\'sym")
     check(print(@[Token(kind: Symbol, quoting: Double, value: "sym")]) == "\\\"sym\"")
 
-suite "sss roundtrips":
+suite "roundtrips":
   let chunks = @["😅", " ", "'", "\"", "\\", "\\00", "\\u0000", "\x00", "\u0000"];
 
   test "parses and prints and parses and prints the same":

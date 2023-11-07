@@ -2,7 +2,8 @@
 /dist/
 /node_modules/
 /testresults/
-/tests/sss/tsss
+/tests/best/tbest
+/tests/json/tjson
 /tests/stor/tstor
 /wasm/
 nimcache/

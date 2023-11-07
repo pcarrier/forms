@@ -2,7 +2,7 @@
 
 [notes](notes.md)
 
-## Sequence of Symbols and Strings (SSS)
+## Barely Even Structured Text (BEST)
 
 Spaces are separators outside of double quotes and escape sequences, and not required.
 
@@ -29,7 +29,7 @@ Quoting is preserved by parsers and printers, and meaningful in some circumstanc
 
 ## Simple Textual Object Representation (STOR)
 
-Builds on [SSS](#sequence-of-symbols-and-strings-sss).
+Builds on [BEST](#barely-even-structured-text-best).
 
 Treats some symbols specially.
 

@@ -1,11 +1,11 @@
-import std/[deques, sequtils, tables, unittest], form, sss, stor
+import std/[deques, sequtils, tables, unittest], best, form, stor
 
 func newRef(value: Form): Ref =
   result = new(Ref)
   result[] = value
 
 
-suite "stor parser":
+suite "parser":
   test "handles a form with spaces":
     let stream = parse("foo\\ bar")
     let (parsed, _) = parse(stream)
@@ -25,13 +25,13 @@ suite "stor parser":
     ]
     check(parsed == expected)
 
-suite "stor printer":
+suite "printer":
   test "outputs spaces and zeros escaped":
     let forms = @[Form(kind: Sym, sym: "foo bar\x00quz").refer, Form(kind: U8, u8: 0).refer]
     let expected = "foo\\ bar\\00quz #u8 0"
     check(print(forms) == expected)
 
-suite "sss roundtrips":
+suite "roundtrips":
   let chunks = @["😅", " ", "'", "\"", "\\", "\\00", "\\u0000", "\x00", "\u0000", " { ", " } ", "%", "[", "]", "#c"]
 
   test "parses and prints and parses and prints the same":
@@ -47,8 +47,8 @@ suite "sss roundtrips":
           try: str.parse.parse
           except ParseError: break subtest
         let printed = parsed.map(refer).print
-        let resss = printed.parse
-        let (reparsed, _) = resss.parse
+        let re = printed.parse
+        let (reparsed, _) = re.parse
         check(parsed == reparsed)
         let reprinted = print(reparsed.map(refer))
         check(reprinted == printed)
