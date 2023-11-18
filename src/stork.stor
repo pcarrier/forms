@@ -70,4 +70,12 @@
 
   #c Convenience
   <cont ( <data [ ] swap rpush <contexts rpush <stream ( lpop drop rpush ) )
-  get-or ( over2 over2 has [ drop get ] [ swap drop swap drop ] if ) } %8
+  get-or ( over2 over2 has [ drop get ] [ swap drop swap drop ] if )
+  
+  map ( over size
+        [ dup #i32 0 > ] [
+          over swap rpush swap rpush swap
+          lpop rot rot rpush eval
+          #u8 3 pick rpush [ ] swap rpush swap rpush rot drop
+          lpop swap lpop swap drop rot #i32 1 -
+        ] while drop drop ) } %8
