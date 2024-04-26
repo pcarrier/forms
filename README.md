@@ -62,7 +62,7 @@ Numbers can take the forms `0` `+3.14` `6.626068e-34` `+299_792_458` `0xdeadbeef
 
 ## Binary Equal Alternative to Structured Text (BEAST)
 
-Bijection to BEST below, a subset of CBOR data streams where every item is a byte string, sometimes but not always tagged.
+Bijection to [BEST](#barely-even-structured-text-best), a subset of [CBOR](https://cbor.io/) data streams where every item is a byte string, sometimes but not always tagged.
 
 - Untagged corresponds to a unquoted symbol
 - Tag 7 corresponds to single-quoted symbol
