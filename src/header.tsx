@@ -37,7 +37,7 @@ const header = (
       </a>{' '}
       and vague aspirations. Not pragmatic at all, and as slow as it gets.
       <br />
-      Fewer than 70kB of wasm bootstrapped with{' '}
+      Fewer than 80kB of wasm bootstrapped with{' '}
       <a href="https://github.com/pcarrier/forms/blob/main/src/stork.stor">
         stork
       </a>{' '}
