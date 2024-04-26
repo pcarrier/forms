@@ -56,6 +56,18 @@ Treats some symbols specially.
   - `u16` 16-bit unsigned integer following
   - `u8` 8-bit unsigned integer following
   - `[0-9]*` CBOR-style tag following
-- Unquoted `%i` where `i` is an integer is `%6 %u8 i` (a shorthand for STORM primitives)
+- Unquoted `%i` where `i` is an integer is `#6 %u8 i` (a shorthand for STORM primitives)
 
 Numbers can take the forms `0` `+3.14` `6.626068e-34` `+299_792_458` `0xdeadbeef` `+inf`, `-inf`, `nan`. Whatever Nim parses today (to be better specified later).
+
+## Binary Equal Alternative to Structured Text (BEAST)
+
+Bijection to BEST below, a subset of CBOR data streams where every item is a byte string, sometimes but not always tagged.
+
+- Untagged corresponds to a unquoted symbol
+- Tag 7 corresponds to single-quoted symbol
+- Tag 8 corresponds to double-quoted symbol
+- Tag 9 corresponds to a single-quoted string
+- Tag 10 corresponds to a double-quoted string
+
+More compact than BEST for large binary-heavy data, primarily intended to avoid writing parsers and printers for yet another language in yet another language.
