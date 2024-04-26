@@ -7,7 +7,11 @@ import App from "./app.tsx";
 const worker = (window.$worker = new Worker());
 
 worker.onmessage = (e) => {
-  eval(e.data);
+  try {
+    eval(e.data);
+  } catch (err) {
+    console.error(err, e.data);
+  }
 };
 
 const root = createRoot(document.getElementById("app")!);

@@ -1,14 +1,10 @@
 import std/strutils
 
-func jsString*(s: string, depth: uint8, replaceHTML: bool, externalQuotes: bool): string =
-  let repeatsOnQuotesAround = (1 shl depth) - 1
-  let repeatsOnBackslashInside = (1 shl (depth + 1))
-  let repeatsOnQuotesInside = repeatsOnBackslashInside - 1
+func jsString*(s: string, depth: uint8, replaceHTML: bool): string =
+  let repeatsOnBackslashInside = 1 shl depth
+  let repeatsOnQuotesInside = (1 shl depth) - 1
   let len = s.len
   result = newStringOfCap(len + len shr 1)
-  if externalQuotes:
-    result.add(repeat('\\', repeatsOnQuotesAround))
-    result.add('\'')
   for c in items(s):
     case c
     of '\\': result.add(repeat('\\', repeatsOnBackslashInside))
@@ -22,12 +18,8 @@ func jsString*(s: string, depth: uint8, replaceHTML: bool, externalQuotes: bool)
       if replaceHTML: result.add("&gt;")
       else: result.add(c)
     else: result.add(c)
-  if externalQuotes:
-    result.add(repeat('\\', repeatsOnQuotesAround))
-    result.add('\'')
 
 proc emscripten_run_script(code: cstring) {.header: "<emscripten.h>", importc: "emscripten_run_script".}
 
 proc jsEval*(code: string) =
-  # echo "jsEval: ", cstring(code)
   emscripten_run_script(cstring(code))

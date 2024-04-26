@@ -55,7 +55,7 @@ proc displayVM(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#"
     try: VMs[slot].addr
     except KeyError:
       return
-  jsEval(&"self.postMessage('window.$ui({vm.sap.jsString(1, false, false)})')")
+  jsEval(&"self.postMessage('window.$ui({vm.sap.jsString(1, false)})')")
 
 proc deFault(slot: int) {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
   var vm =

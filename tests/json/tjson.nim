@@ -1,4 +1,4 @@
-import std/[deques, tables, unittest], form, stor, json
+import std/unittest, form, stor, json
 
 suite "json parsing":
   test "parses null":
