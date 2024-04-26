@@ -17,14 +17,14 @@ Dabbling at a formulaic format forming formidable formalisms.
 
 _*Status:* memory ready, STOR printing elides cycles and STOR parsing reports them_
 
-FORM is STOR with cycles. That is to say, whereas STORM streams represent a forest, FORM constitutes a graph.
+FORM is STOR with cycles. That is to say, whereas STOR streams represent a forest, FORM constitutes a graph.
 
 It can be serialized to STORM and CBOR, handling cycles with tags `#28` and `#29` or `#31 #u`
 (all as specified in [IANA](https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml)).
 
-## STORM Machine (STORM)
+## STOR Machine (STORM)
 
-_*Status:* thinking_
+_*Status:* playing at [formic.id](https://formic.id)_
 
 STORM is a virtual machine with a data stack, a context stack, and a stream, all containing references to FORM values (henceforth forms).
 
