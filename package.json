@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy": "npm run build && xmit formic.id"
   },
   "devDependencies": {
     "@types/react": "^18.2.35",
     "@types/react-dom": "^18.2.14",
     "@vitejs/plugin-react": "^4.1.1",
+    "@xmit.co/xmit": "0.2.8-0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vitest": "^0.34.6"
