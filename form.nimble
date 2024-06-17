@@ -3,7 +3,7 @@ author        = "Pierre Carrier"
 description   = "A novel form factor"
 license       = "0BSD"
 srcDir        = "src"
-bin           = @["wasm/formicid"]
+bin           = @["wasm/formicid", "dabble/dabble"]
 
 requires "nim >= 2.0.0"
 requires "jsony >= 1.1.5"
